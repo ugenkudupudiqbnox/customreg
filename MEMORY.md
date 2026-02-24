@@ -48,22 +48,45 @@ Fields:
 ## Enforcement Model (Production Safe)
 
 Existing users:
-- documentrequired = 0
-- documentuploaded = 1
-- status = approved
-- Never redirected
-- Never blocked
+- `documentrequired = 0`
+- `documentuploaded = 1`
+- `status = approved`
+- Never redirected, never blocked.
 
-New users:
-- documentrequired = 1
-- documentuploaded = 0
-- status = pending
-- Redirected after login
-- Blocked until approved
+New users (Restricted):
+- `documentrequired = 1`
+- `documentuploaded = 0` (Initially)
+- `status = pending`
+- Redirected to `upload.php` after login.
+- Cannot access dashboard or courses until approved.
 
 ---
 
-## Correct Hooks (Moodle 5.1+)
+## Admin Management (v10.3+)
+
+- **Features**:
+  - List of all customized users.
+  - Search by Name or Email.
+  - Pagination (20 users per page).
+  - Status badges (Approved/Pending/Denied).
+  - **In-Page Preview**: IDs now open in a large Bootstrap Modal overlay on the same page (no new tabs or windows).
+  - **Action Icons**: Standard Moodle icons: **Preview (eye)**, **Tick** (Approve) and **Cross** (Deny).
+  - **Deny Action**: 
+    - Resets `documentuploaded` to 0.
+    - Sets status to `denied`.
+    - Deletes physical files to allow a fresh upload.
+    - User sees an "Accepted document was not accepted" warning on the upload screen.
+
+---
+
+## Technical Details: File Serving
+
+The plugin uses the `local_customreg_pluginfile` function in `lib.php` to serve uploaded IDs.
+- **Context**: System (`CONTEXT_SYSTEM`)
+- **Component**: `local_customreg`
+- **File Area**: `govid`
+- **Item ID**: `{userid}`
+- **Permissions**: Only the owner or a Site Administrator can download the files.
 
 Modern namespaced hooks in `classes/hook_handler.php`:
 

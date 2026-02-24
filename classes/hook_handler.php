@@ -12,12 +12,17 @@ defined('MOODLE_INTERNAL') || die();
 class hook_handler {
 
     /**
-     * Enforce document status before headers are sent
+     * Common logic for enforcement
      */
-    public static function before_http_headers(\core\hook\output\before_http_headers $hook): void {
+    public static function before_http_headers_logic(): void {
         global $USER, $DB, $PAGE;
 
-        if (!isloggedin() || isguestuser() || is_siteadmin()) {
+        if (!isloggedin() || isguestuser()) {
+            return;
+        }
+
+        // Only enforce for regular users (let admins through)
+        if (is_siteadmin()) {
             return;
         }
 
@@ -27,49 +32,62 @@ class hook_handler {
 
         $rec = $DB->get_record('local_customreg', ['userid' => $USER->id]);
         if (!$rec) {
-            // Auto-create record for users who slipped through signup audit
-            $identitytype = 'new';
-            $isnew = true;
-            
+            // Auto-create record for users who slipped through signup audit (assuming 'new')
             $rec = (object)[
                 'userid' => $USER->id,
-                'identitytype' => $identitytype,
-                'documentrequired' => $isnew ? 1 : 0,
-                'documentuploaded' => $isnew ? 0 : 1,
-                'status' => $isnew ? 'pending' : 'approved',
+                'identitytype' => 'new',
+                'documentrequired' => 1,
+                'documentuploaded' => 0,
+                'status' => 'pending',
                 'timecreated' => time(),
                 'timemodified' => time()
             ];
             
             $rec->id = $DB->insert_record('local_customreg', $rec);
+            // Refresh record to ensure it has all defaults if any
+            $rec = $DB->get_record('local_customreg', ['id' => $rec->id]);
         }
 
         $path = $PAGE->url->get_path();
 
-        // Allow upload.php and standard assets
-        if (strpos($path, '/local/customreg/upload.php') !== false) {
+        // Allow upload.php, login process and logout
+        if (strpos($path, '/local/customreg/upload.php') !== false || 
+            strpos($path, '/login/') !== false || 
+            strpos($path, '/logout.php') !== false) {
             return;
         }
 
         if ($rec->documentrequired == 1) {
-            if ($rec->documentuploaded == 0) {
-                redirect(new moodle_url('/local/customreg/upload.php'));
-            }
-
             if ($rec->status !== 'approved') {
-                throw new \moodle_exception('pendingapproval', 'local_customreg');
+                // If not approved, force them to stay on upload.php
+                // (which will handle the "form" vs "pending review" UI)
+                if (strpos($path, '/local/customreg/upload.php') === false) {
+                    redirect(new moodle_url('/local/customreg/upload.php'));
+                }
+                return;
             }
         }
+    }
+
+    /**
+     * Enforce document status before headers are sent (MODERN)
+     */
+    public static function before_http_headers(\core\hook\output\before_http_headers $hook): void {
+        self::before_http_headers_logic();
     }
 
     /**
      * Handle signup audit and document requirements
      */
     public static function after_signup(\core\hook\user\after_signup $hook): void {
-        global $DB;
+        self::after_signup_legacy($hook->get_user(), $hook->get_data());
+    }
 
-        $user = $hook->get_user();
-        $data = $hook->get_data();
+    /**
+     * Legacy compatible after signup implementation
+     */
+    public static function after_signup_legacy($user, $data): void {
+        global $DB;
 
         $identitytype = $data->local_customreg_identitytype ?? 'new';
         $isnew = ($identitytype === 'new');

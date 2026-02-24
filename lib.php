@@ -12,67 +12,47 @@ function local_customreg_extend_signup_form($mform) {
  * Legacy hook for after signup
  */
 function local_customreg_after_signup($user, $data) {
+    \local_customreg\hook_handler::after_signup_legacy($user, $data);
+}
+
+/**
+ * Serve files for this plugin
+ */
+function local_customreg_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     global $DB;
 
-    // Log the event to standard error log
-    error_log("DEBUG: local_customreg_after_signup for USER: " . ($user->id ?? 'NOTSET'));
+    if ($context->contextlevel != CONTEXT_SYSTEM) {
+        return false;
+    }
 
-    $identitytype = $data->local_customreg_identitytype ?? 'new';
-    $isnew = ($identitytype === 'new');
+    require_login();
 
-    $DB->insert_record('local_customreg', (object)[
-        'userid' => $user->id,
-        'identitytype' => $identitytype,
-        'institutionid' => $data->local_customreg_institutionid ?? null,
-        'documentrequired' => $isnew ? 1 : 0,
-        'documentuploaded' => $isnew ? 0 : 1,
-        'status' => $isnew ? 'pending' : 'approved',
-        'timecreated' => time(),
-        'timemodified' => time()
-    ]);
+    if ($filearea !== 'govid') {
+        return false;
+    }
+
+    $userid = (int)array_shift($args);
+    $filename = array_pop($args);
+
+    // Only owners or admins can see the file
+    if ($userid != $GLOBALS['USER']->id && !is_siteadmin()) {
+        send_file_not_found();
+    }
+
+    $fs = get_file_storage();
+    $file = $fs->get_file($context->id, 'local_customreg', 'govid', $userid, '/', $filename);
+
+    if (!$file) {
+        send_file_not_found();
+    }
+
+    send_stored_file($file, 0, 0, $forcedownload, $options);
 }
 
 /**
  * Legacy hook for enforcement
  */
 function local_customreg_before_http_headers() {
-    global $USER, $DB, $PAGE;
-
-    if (!isloggedin() || isguestuser() || is_siteadmin()) {
-        return;
-    }
-
-    if (CLI_SCRIPT || (defined('AJAX_SCRIPT') && AJAX_SCRIPT)) {
-        return;
-    }
-
-    $rec = $DB->get_record('local_customreg', ['userid' => $USER->id]);
-    if (!$rec) {
-        $data = (object)[
-            'userid' => $USER->id,
-            'identitytype' => 'new',
-            'documentrequired' => 1,
-            'documentuploaded' => 0,
-            'status' => 'pending',
-            'timecreated' => time(),
-            'timemodified' => time()
-        ];
-        $id = $DB->insert_record('local_customreg', $data);
-        $rec = $DB->get_record('local_customreg', ['id' => $id]);
-    }
-
-    $path = $PAGE->url->get_path();
-
-    if (strpos($path, '/local/customreg/upload.php') !== false) {
-        return;
-    }
-
-    if ($rec->documentrequired == 1 && $rec->documentuploaded == 0) {
-        redirect(new moodle_url('/local/customreg/upload.php'));
-    }
-
-    if ($rec->documentrequired == 1 && $rec->status !== 'approved') {
-        print_error(get_string('pendingapproval','local_customreg'));
-    }
+    \local_customreg\hook_handler::before_http_headers_logic();
 }
 
