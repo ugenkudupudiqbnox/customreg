@@ -42,9 +42,10 @@ if ($action === 'approve' && $userid > 0 && confirm_sesskey()) {
     $DB->set_field('local_customreg', 'status', 'approved', ['userid' => $userid]);
     $DB->set_field('local_customreg', 'timemodified', time(), ['userid' => $userid]);
     
-    // Log approval
     require_once($CFG->dirroot . '/local/customreg/lib.php');
-    local_customreg_log($userid, 'approved', 'Registration request approved.');
+    
+    // Log approval
+    local_customreg_log($userid, 'approved', 'Registration overall approved.');
     
     redirect($PAGE->url, get_string('userapproved', 'local_customreg'), 2);
 }
@@ -64,6 +65,61 @@ if ($action === 'deny' && $userid > 0 && confirm_sesskey()) {
     $fs->delete_area_files($context->id, 'local_customreg', 'govid', $userid);
     
     redirect($PAGE->url, get_string('userdenied', 'local_customreg'), 2);
+}
+
+// Handle Individual Course Approval
+if ($action === 'approvecourse' && $userid > 0 && confirm_sesskey()) {
+    $courseid = required_param('courseid', PARAM_INT);
+    $rec = $DB->get_record('local_customreg', ['userid' => $userid], '*', MUST_EXIST);
+    $courses = json_decode($rec->courseidsjson, true) ?: [];
+    
+    require_once($CFG->dirroot . '/local/customreg/lib.php');
+    foreach ($courses as &$c) {
+        if ($c['id'] == $courseid) {
+            $c['status'] = 'approved';
+            local_customreg_enroll_user_into_course($userid, $courseid);
+            local_customreg_log($userid, 'approvecourse', "Course ID $courseid approved and user enrolled.");
+        }
+    }
+    
+    $DB->set_field('local_customreg', 'courseidsjson', json_encode($courses), ['id' => $rec->id]);
+    redirect($PAGE->url, get_string('enrollsuccess', 'local_customreg'), 2);
+}
+
+// Handle Individual Course Denial
+if ($action === 'denycourse' && $userid > 0 && confirm_sesskey()) {
+    $courseid = required_param('courseid', PARAM_INT);
+    $rec = $DB->get_record('local_customreg', ['userid' => $userid], '*', MUST_EXIST);
+    $courses = json_decode($rec->courseidsjson, true) ?: [];
+    
+    require_once($CFG->dirroot . '/local/customreg/lib.php');
+    foreach ($courses as &$c) {
+        if ($c['id'] == $courseid) {
+            $c['status'] = 'denied';
+            local_customreg_log($userid, 'denycourse', "Course ID $courseid denied.");
+        }
+    }
+    
+    $DB->set_field('local_customreg', 'courseidsjson', json_encode($courses), ['id' => $rec->id]);
+    redirect($PAGE->url, get_string('userdenied', 'local_customreg'), 2);
+}
+
+// Handle Bulk Course Approval
+if ($action === 'approveallcourses' && $userid > 0 && confirm_sesskey()) {
+    $rec = $DB->get_record('local_customreg', ['userid' => $userid], '*', MUST_EXIST);
+    $courses = json_decode($rec->courseidsjson, true) ?: [];
+    
+    require_once($CFG->dirroot . '/local/customreg/lib.php');
+    foreach ($courses as &$c) {
+        if ($c['status'] === 'pending') {
+            $c['status'] = 'approved';
+            local_customreg_enroll_user_into_course($userid, $c['id']);
+            local_customreg_log($userid, 'approvecourse', "Course ID {$c['id']} approved via bulk action.");
+        }
+    }
+    
+    $DB->set_field('local_customreg', 'courseidsjson', json_encode($courses), ['id' => $rec->id]);
+    redirect($PAGE->url, get_string('enrollsuccess', 'local_customreg'), 2);
 }
 
 echo $OUTPUT->header();
@@ -108,6 +164,7 @@ if (!$records) {
         'User',
         'Institution ID',
         get_string('documentstatus', 'local_customreg'),
+        'Requested Courses',
         get_string('action', 'local_customreg')
     ];
 
@@ -122,6 +179,65 @@ if (!$records) {
             $statuscolor = 'badge-danger';
         }
         $statusbadge = html_writer::tag('span', $statusstr, ['class' => 'badge ' . $statuscolor]);
+
+        // Course Selection Column Logic
+        $coursesjson = json_decode($rec->courseidsjson, true) ?: [];
+        $courselist = [];
+        $haspending = false;
+
+        foreach ($coursesjson as $cinfo) {
+            $course = $DB->get_record('course', ['id' => $cinfo['id']]);
+            if (!$course) continue;
+            
+            if ($cinfo['status'] === 'pending') {
+                $haspending = true;
+                $statusclass = 'badge-warning';
+                
+                // Individual course buttons
+                $approvecurl = new moodle_url($PAGE->url, [
+                    'action' => 'approvecourse', 
+                    'userid' => $rec->userid, 
+                    'courseid' => $cinfo['id'], 
+                    'sesskey' => sesskey()
+                ]);
+                $denycurl = new moodle_url($PAGE->url, [
+                    'action' => 'denycourse', 
+                    'userid' => $rec->userid, 
+                    'courseid' => $cinfo['id'], 
+                    'sesskey' => sesskey()
+                ]);
+                
+                $citem = html_writer::tag('div', 
+                    $course->fullname . ' ' .
+                    html_writer::tag('span', 'Pending', ['class' => 'badge ' . $statusclass]) . ' ' .
+                    $OUTPUT->action_icon($approvecurl, new pix_icon('t/check', 'Approve')) .
+                    $OUTPUT->action_icon($denycurl, new pix_icon('t/delete', 'Deny')),
+                    ['class' => 'mb-1 border-bottom pb-1']
+                );
+            } else {
+                $statusclass = ($cinfo['status'] === 'approved') ? 'badge-success' : 'badge-danger';
+                $citem = html_writer::tag('div', 
+                    $course->fullname . ' ' .
+                    html_writer::tag('span', ucfirst($cinfo['status']), ['class' => 'badge ' . $statusclass]),
+                    ['class' => 'mb-1 border-bottom pb-1']
+                );
+            }
+            $courselist[] = $citem;
+        }
+
+        $courseinfo = implode('', $courselist);
+        if ($haspending) {
+            $approveallurl = new moodle_url($PAGE->url, [
+                'action' => 'approveallcourses', 
+                'userid' => $rec->userid, 
+                'sesskey' => sesskey()
+            ]);
+            $courseinfo .= html_writer::link($approveallurl, 'Approve All Courses', ['class' => 'btn btn-outline-success btn-sm mt-1']);
+        }
+
+        if (empty($courseinfo)) {
+            $courseinfo = '<small>No courses selected</small>';
+        }
 
         $actions = [];
 
@@ -161,6 +277,7 @@ if (!$records) {
             $userlink . '<br><small>' . s($rec->email) . '</small>',
             s($rec->institutionid),
             $statusbadge,
+            $courseinfo,
             implode(' ', $actions)
         ];
     }

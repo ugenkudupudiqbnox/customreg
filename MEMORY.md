@@ -4,10 +4,9 @@
 
 - Moodle 5.x
 - MariaDB
-- nginx
+- nginx or apache
 - PHP-FPM
-- Production site
-- ~400 existing users
+
 
 ---
 

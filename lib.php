@@ -2,10 +2,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Legacy hook for signup extension
+ * Legacy hook for signup extension (DEPRECATED: MOVED TO POST-LOGIN)
  */
 function local_customreg_extend_signup_form($mform) {
-    \local_customreg\hook_handler::signup_form_definition_legacy($mform);
+    // No longer extending the signup form.
 }
 
 /**
@@ -62,6 +62,70 @@ function local_customreg_pluginfile($course, $cm, $context, $filearea, $args, $f
     }
 
     send_stored_file($file, 0, 0, $forcedownload, $options);
+}
+
+/**
+ * Helper to enroll a user into a course manually
+ */
+function local_customreg_enroll_user_into_course($userid, $courseid) {
+    global $DB;
+    
+    $course = $DB->get_record('course', ['id' => $courseid]);
+    if (!$course) return false;
+
+    // Get the manual enrol plugin
+    $manualenrol = enrol_get_plugin('manual');
+    if (!$manualenrol) return false;
+
+    // Find the manual instance in this course
+    $instances = enrol_get_instances($courseid, true);
+    $manualinstance = null;
+    foreach ($instances as $instance) {
+        if ($instance->enrol == 'manual') {
+            $manualinstance = $instance;
+            break;
+        }
+    }
+    
+    // Fallback: If no manual instance, add one
+    if (!$manualinstance) {
+        $manualinstanceid = $manualenrol->add_default_instance($course);
+        $manualinstance = $DB->get_record('enrol', ['id' => $manualinstanceid]);
+    }
+    
+    // Check if already enrolled
+    if (is_enrolled(context_course::instance($courseid), $userid)) {
+        return 'alreadyenrolled';
+    }
+    
+    // Assign Student Role ( обычно roleid = 5 по умолчанию )
+    $roleid = $DB->get_field('role', 'id', ['shortname' => 'student']);
+    $manualenrol->enrol_user($manualinstance, $userid, $roleid);
+    return 'enrollsuccess';
+}
+
+/**
+ * Validate that no more than 5 courses are selected in the admin settings.
+ */
+function local_customreg_validate_courses($value) {
+    if (empty($value)) {
+        return true; 
+    }
+    
+    // Config values are often CSV strings from multiselects
+    if (!is_array($value)) {
+        $value = explode(',', $value);
+    }
+    
+    // Filter out zeros or empty values
+    $value = array_filter($value, function($v) {
+        return !empty($v) && $v != '0';
+    });
+    
+    if (count($value) > 5) {
+        return get_string('maxcoursesreached', 'local_customreg');
+    }
+    return true;
 }
 
 /**

@@ -15,14 +15,18 @@ class hook_handler {
      * Common logic for enforcement
      */
     public static function before_http_headers_logic(): void {
-        global $USER, $DB, $PAGE;
+        global $USER, $DB, $PAGE, $CFG;
 
         if (!isloggedin() || isguestuser()) {
             return;
         }
 
-        // Only enforce for regular users (let admins through)
-        if (is_siteadmin()) {
+        // Only enforce for students (Skip admins, managers, and course creators)
+        $systemcontext = context_system::instance();
+        if (is_siteadmin() || 
+            has_capability('moodle/site:config', $systemcontext) ||
+            has_capability('moodle/course:create', $systemcontext) ||
+            has_capability('moodle/user:create', $systemcontext)) {
             return;
         }
 
@@ -39,6 +43,7 @@ class hook_handler {
                 'documentrequired' => 1,
                 'documentuploaded' => 0,
                 'status' => 'pending',
+                'courseidsjson' => json_encode([]),
                 'timecreated' => time(),
                 'timemodified' => time()
             ];
@@ -47,7 +52,7 @@ class hook_handler {
             
             // Log the initial record creation
             require_once($CFG->dirroot . '/local/customreg/lib.php');
-            local_customreg_log($USER->id, 'raised', 'Initial registration record created via enforcement hook.');
+            local_customreg_log($USER->id, 'raised', 'Initial registration record created via enforcement hook (slipped through signup).');
 
             // Refresh record to ensure it has all defaults if any
             $rec = $DB->get_record('local_customreg', ['id' => $rec->id]);
@@ -94,47 +99,40 @@ class hook_handler {
     public static function after_signup_legacy($user, $data): void {
         global $DB, $CFG;
 
-        $identitytype = $data->local_customreg_identitytype ?? 'new';
-        $isnew = ($identitytype === 'new');
+        error_log("CUSTOMREG: after_signup_legacy for UID: " . $user->id);
 
-        $rec = (object)[
-            'userid' => $user->id,
-            'identitytype' => $identitytype,
-            'institutionid' => $data->local_customreg_institutionid ?? null,
-            'documentrequired' => $isnew ? 1 : 0,
-            'documentuploaded' => $isnew ? 0 : 1,
-            'status' => $isnew ? 'pending' : 'approved',
-            'timecreated' => time(),
-            'timemodified' => time()
-        ];
-
-        $DB->insert_record('local_customreg', $rec);
+        $rec = $DB->get_record('local_customreg', ['userid' => $user->id]);
+        if (!$rec) {
+            $rec = (object)[
+                'userid' => $user->id,
+                'identitytype' => 'new',
+                'institutionid' => '',
+                'courseidsjson' => json_encode([]),
+                'documentrequired' => 1,
+                'documentuploaded' => 0,
+                'status' => 'pending',
+                'timecreated' => time(),
+                'timemodified' => time()
+            ];
+            $DB->insert_record('local_customreg', $rec);
+        }
 
         require_once($CFG->dirroot . '/local/customreg/lib.php');
-        local_customreg_log($user->id, 'raised', 'Registration raised via signup form.');
+        local_customreg_log($user->id, 'raised', 'Initial registration record created. Data will be collected after login.');
     }
 
     /**
-     * Legacy compatible signup form extension
-     */
-    public static function signup_form_definition_legacy(\MoodleQuickForm $mform): void {
-        $mform->addElement('select', 'local_customreg_identitytype',
-            get_string('areyouexisting', 'local_customreg'),
-            [
-                'existing' => get_string('existingmember', 'local_customreg'),
-                'new' => get_string('newmember', 'local_customreg')
-            ]
-        );
-
-        $mform->addElement('text', 'local_customreg_institutionid', 
-            get_string('institutionid', 'local_customreg'));
-        $mform->setType('local_customreg_institutionid', PARAM_ALPHANUMEXT);
-    }
-
-    /**
-     * Extend signup form with identity fields
+     * Extend signup form with identity fields (NOW REMOVED - MOVED TO AFTER LOGIN)
      */
     public static function signup_form_definition(\core\hook\user\signup_form_definition $hook): void {
-        self::signup_form_definition_legacy($hook->get_mform());
+        // No longer extending the signup form as Moodle strips the data.
+        // All fields are now gathered on the upload.php page after user registration.
+    }
+
+    /**
+     * Signup form validation logic (NOW REMOVED)
+     */
+    public static function signup_form_validation_callback($data, $files, $mform) {
+        return [];
     }
 }

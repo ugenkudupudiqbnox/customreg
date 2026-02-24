@@ -31,31 +31,141 @@ if ($rec && $rec->documentuploaded == 1 && $rec->status === 'pending') {
 
 class local_customreg_upload_form extends moodleform {
     public function definition() {
+        global $DB;
         $mform = $this->_form;
 
+        // 1. Identity Type
+        $mform->addElement('header', 'identityheader', 'Member Information');
+        $mform->addElement('select', 'identitytype',
+            get_string('areyouexisting', 'local_customreg'),
+            [
+                'existing' => get_string('existingmember', 'local_customreg'),
+                'new' => get_string('newmember', 'local_customreg')
+            ]
+        );
+
+        // 2. Institution ID
+        $mform->addElement('text', 'institutionid', get_string('institutionid', 'local_customreg'));
+        $mform->setType('institutionid', PARAM_ALPHANUMEXT);
+
+        // 3. Course Selection (Searchable)
+        $availableids = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $cid = (int)get_config('local_customreg', "course$i");
+            if ($cid > 0) {
+                $availableids[] = $cid;
+            }
+        }
+
+        if (!empty($availableids)) {
+            $options = [];
+            foreach ($availableids as $cid) {
+                if ($cid == 0) continue;
+                $course = get_course($cid);
+                if ($course) {
+                    $options[$cid] = $course->fullname;
+                }
+            }
+            
+            if (!empty($options)) {
+                $mform->addElement('header', 'courseheader', get_string('selectcourses', 'local_customreg'));
+                
+                // Using autocomplete with multiple=true for "searchable selection"
+                $mform->addElement('autocomplete', 'customreg_courses', 
+                    get_string('selectcourses', 'local_customreg'), 
+                    $options, 
+                    ['multiple' => true, 'noselectionstring' => 'Search and select courses...']
+                );
+                $mform->addRule('customreg_courses', null, 'required', null, 'client');
+                $mform->addHelpButton('courseheader', 'availablecourses', 'local_customreg');
+            }
+        }
+
+        // 4. File Picker
+        $mform->addElement('header', 'fileheader', 'Verification Document');
+        $mform->setExpanded('fileheader');
+        
         $mform->addElement('filepicker', 'govid', 'Government ID', null, [
             'accepted_types' => ['.pdf', '.jpg', '.png']
         ]);
         $mform->addRule('govid', null, 'required', null, 'client');
 
-        $this->add_action_buttons(false, 'Upload');
+        $this->add_action_buttons(false, 'Submit Registration');
+    }
+
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+        
+        $count = 0;
+        if (!empty($data['customreg_courses'])) {
+            $count = count($data['customreg_courses']);
+        }
+        
+        if ($count > 5) {
+            $errors['customreg_courses'] = get_string('maxcoursesreached', 'local_customreg');
+        } else if ($count == 0) {
+            $errors['customreg_courses'] = get_string('atleastonecourse', 'local_customreg');
+        }
+        
+        return $errors;
     }
 }
 
 $mform = new local_customreg_upload_form();
 
+if ($rec) {
+    $defaults = [
+        'identitytype' => $rec->identitytype,
+        'institutionid' => $rec->institutionid
+    ];
+    $courses = json_decode($rec->courseidsjson, true) ?: [];
+    $defaults['customreg_courses'] = array_column($courses, 'id');
+    $mform->set_data($defaults);
+}
+
 if ($data = $mform->get_data()) {
+    $context = context_system::instance();
     $draftid = file_get_submitted_draft_itemid('govid');
     file_save_draft_area_files($draftid, $context->id, 'local_customreg', 'govid', $USER->id);
 
-    // Set back to pending even if previously denied
-    $DB->set_field('local_customreg', 'documentuploaded', 1, ['userid' => $USER->id]);
-    $DB->set_field('local_customreg', 'status', 'pending', ['userid' => $USER->id]);
-    $DB->set_field('local_customreg', 'timemodified', time(), ['userid' => $USER->id]);
+    // Extract courses from the autocomplete multiple select
+    $selectedcourses = [];
+    if (!empty($data->customreg_courses)) {
+        foreach ($data->customreg_courses as $cid) {
+            $cid = (int)$cid;
+            if ($cid > 0) {
+                $selectedcourses[] = [
+                    'id' => $cid,
+                    'status' => 'pending',
+                    'timecreated' => time()
+                ];
+            }
+        }
+    }
 
-    // Log the upload
+    // Update the record
+    $update = new stdClass();
+    $update->userid = $USER->id;
+    $update->identitytype = $data->identitytype;
+    $update->institutionid = $data->institutionid;
+    $update->courseidsjson = json_encode($selectedcourses);
+    $update->documentuploaded = 1;
+    $update->status = 'pending';
+    $update->timemodified = time();
+
+    // Ensure record exists before updating
+    $rec = $DB->get_record('local_customreg', ['userid' => $USER->id]);
+    if (!$rec) {
+        $update->timecreated = time();
+        $DB->insert_record('local_customreg', $update);
+    } else {
+        $update->id = $rec->id;
+        $DB->update_record('local_customreg', $update);
+    }
+
+    // Log the update
     require_once($CFG->dirroot . '/local/customreg/lib.php');
-    local_customreg_log($USER->id, 'uploaded', 'User uploaded a new document for identification.');
+    local_customreg_log($USER->id, 'uploaded', 'User completed registration form and uploaded document.');
 
     echo $OUTPUT->header();
     echo $OUTPUT->notification('Document uploaded successfully.', 'notifysuccess');
