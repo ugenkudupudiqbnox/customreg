@@ -23,5 +23,5 @@ $string['denied'] = 'Denied';
 $string['customreg:manage'] = 'Manage custom registrations';
 $string['userapproved'] = 'User has been approved.';
 $string['userdenied'] = 'User registration has been denied. The user can now re-upload their ID.';
-$string['searchusers'] = 'Search Users';
+$string['searchusers'] = 'Search users or email';
 $string['uploadagain'] = 'Your previous document was not accepted. Please upload a clear copy of your Government ID again.';
