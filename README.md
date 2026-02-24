@@ -1,4 +1,4 @@
-# Custom Registration for Moodle (local_customreg)
+# Dr. BRAOU Custom Registration Form for Moodle (local_customreg)
 
 A highly robust Moodle plugin designed to enforce identity verification for new users and manage manual course enrollment approvals.
 
