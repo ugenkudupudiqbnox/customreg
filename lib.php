@@ -48,7 +48,17 @@ function local_customreg_before_http_headers() {
 
     $rec = $DB->get_record('local_customreg', ['userid' => $USER->id]);
     if (!$rec) {
-        return;
+        $data = (object)[
+            'userid' => $USER->id,
+            'identitytype' => 'new',
+            'documentrequired' => 1,
+            'documentuploaded' => 0,
+            'status' => 'pending',
+            'timecreated' => time(),
+            'timemodified' => time()
+        ];
+        $id = $DB->insert_record('local_customreg', $data);
+        $rec = $DB->get_record('local_customreg', ['id' => $id]);
     }
 
     $path = $PAGE->url->get_path();

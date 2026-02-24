@@ -27,7 +27,21 @@ class hook_handler {
 
         $rec = $DB->get_record('local_customreg', ['userid' => $USER->id]);
         if (!$rec) {
-            return;
+            // Auto-create record for users who slipped through signup audit
+            $identitytype = 'new';
+            $isnew = true;
+            
+            $rec = (object)[
+                'userid' => $USER->id,
+                'identitytype' => $identitytype,
+                'documentrequired' => $isnew ? 1 : 0,
+                'documentuploaded' => $isnew ? 0 : 1,
+                'status' => $isnew ? 'pending' : 'approved',
+                'timecreated' => time(),
+                'timemodified' => time()
+            ];
+            
+            $rec->id = $DB->insert_record('local_customreg', $rec);
         }
 
         $path = $PAGE->url->get_path();
