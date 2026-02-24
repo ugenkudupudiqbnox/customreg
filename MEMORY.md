@@ -63,29 +63,26 @@ New users:
 
 ---
 
-## Correct Hooks (Moodle 5.x)
+## Correct Hooks (Moodle 5.1+)
 
-### Signup Hook
+Modern namespaced hooks in `classes/hook_handler.php`:
 
+```php
+public static function after_signup(\core\hook\user\after_signup $hook)
 ```
-
-function local_customreg_after_signup($user, $data)
-
-```
-
 Used to insert row into mdl_local_customreg.
 
-### Enforcement Hook (Bulletproof)
-
+```php
+public static function before_http_headers(\core\hook\output\before_http_headers $hook)
 ```
-
-function local_customreg_before_http_headers()
-
-```
-
 Used to enforce redirect.
 
-DO NOT use after_require_login in Moodle 5.x for enforcement.
+```php
+public static function signup_form_definition(\core\hook\user\signup_form_definition $hook)
+```
+Used to extend signup form.
+
+DO NOT use legacy lib functions for enforcement.
 
 ---
 
@@ -140,9 +137,18 @@ If redirect not happening:
    php admin/cli/purge_caches.php
 
 5. Restart PHP-FPM:
-   sudo systemctl restart php8.1-fpm
+   sudo systemctl restart php-fpm (or specific version like php8.3-fpm)
 
 6. Confirm OPcache not serving old file.
+
+---
+
+## Technical Hook Registration (Moodle 5.1+)
+
+Hooks are registered in db/hooks.php using namespaced callbacks in \local_customreg\hook_handler:
+- \core\hook\output\before_http_headers
+- \core\hook\user\after_signup
+- \core\hook\user\signup_form_definition
 
 ---
 
