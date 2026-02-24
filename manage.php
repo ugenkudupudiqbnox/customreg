@@ -72,12 +72,18 @@ echo $OUTPUT->heading(get_string('manageusers', 'local_customreg'));
 
 // Search Bar
 echo '<div class="mb-4 d-flex justify-content-end">';
-echo '<form action="'.$PAGE->url.'" method="get" class="form-inline d-flex">';
-echo '<input type="text" name="search" class="form-control me-2 mr-2" placeholder="Search by name or email" value="'.s($search).'">';
-echo '<button type="submit" class="btn btn-primary">'.get_string('searchusers', 'local_customreg').'</button>';
+echo '<form action="'.$PAGE->url.'" method="get" class="form-inline">';
+echo '<div class="input-group">';
+echo '<input type="text" name="search" class="form-control" placeholder="Search by name or email" value="'.s($search).'">';
+echo '<div class="input-group-append">';
+echo '<button type="submit" class="btn btn-primary" title="'.s(get_string('searchusers', 'local_customreg')).'"><i class="fa fa-search"></i></button>';
+echo '</div>';
 if ($search) {
-    echo ' <a href="'.$PAGE->url.'" class="btn btn-secondary ms-2 ml-2">Clear</a>';
+    echo '<div class="input-group-append ml-2 ms-2">';
+    echo '<a href="'.$PAGE->url.'" class="btn btn-secondary">Clear</a>';
+    echo '</div>';
 }
+echo '</div>';
 echo '</form>';
 echo '</div>';
 
@@ -106,7 +112,6 @@ if (!$records) {
     $table = new html_table();
     $table->head = [
         'User',
-        get_string('identitytype', 'local_customreg'),
         'Institution ID',
         get_string('documentstatus', 'local_customreg'),
         get_string('action', 'local_customreg')
@@ -160,7 +165,6 @@ if (!$records) {
 
         $table->data[] = [
             $userlink . '<br><small>' . s($rec->email) . '</small>',
-            s($rec->identitytype),
             s($rec->institutionid),
             $statusbadge,
             implode(' ', $actions)
@@ -203,9 +207,9 @@ echo '
 <div class="modal fade" id="logTimelineModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Registration Timeline</h5>
-        <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+      <div class="modal-header d-flex justify-content-between align-items-center">
+        <h5 class="modal-title m-0">Registration Timeline</h5>
+        <button type="button" class="close ml-auto ms-auto" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" style="float: right;">
             <span aria-hidden="true">&times;</span>
         </button>
       </div>
