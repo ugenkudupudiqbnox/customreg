@@ -13,10 +13,39 @@ $search = optional_param('search', '', PARAM_TEXT);
 $page   = optional_param('page', 0, PARAM_INT);
 $perpage = 20;
 
+// Handle Log Retrieval (AJAX-like response)
+if ($action === 'getlogs' && $userid > 0) {
+    header('Content-Type: application/json');
+    $logs = $DB->get_records_sql("
+        SELECT l.*, u.firstname, u.lastname 
+        FROM {local_customreg_logs} l 
+        LEFT JOIN {user} u ON l.adminid = u.id 
+        WHERE l.userid = ? 
+        ORDER BY l.timecreated DESC", [$userid]);
+    
+    $output = [];
+    foreach ($logs as $log) {
+        $admin = ($log->adminid == 0) ? 'System/User' : fullname($log);
+        $output[] = [
+            'date' => userdate($log->timecreated, get_string('strftimedatetimeshort', 'langconfig')),
+            'action' => ucfirst($log->action),
+            'admin' => $admin,
+            'details' => $log->details
+        ];
+    }
+    echo json_encode($output);
+    exit;
+}
+
 // Handle Approval Action
 if ($action === 'approve' && $userid > 0 && confirm_sesskey()) {
     $DB->set_field('local_customreg', 'status', 'approved', ['userid' => $userid]);
     $DB->set_field('local_customreg', 'timemodified', time(), ['userid' => $userid]);
+    
+    // Log approval
+    require_once($CFG->dirroot . '/local/customreg/lib.php');
+    local_customreg_log($userid, 'approved', 'Registration request approved.');
+    
     redirect($PAGE->url, get_string('userapproved', 'local_customreg'), 2);
 }
 
@@ -25,6 +54,10 @@ if ($action === 'deny' && $userid > 0 && confirm_sesskey()) {
     $DB->set_field('local_customreg', 'status', 'denied', ['userid' => $userid]);
     $DB->set_field('local_customreg', 'documentuploaded', 0, ['userid' => $userid]);
     $DB->set_field('local_customreg', 'timemodified', time(), ['userid' => $userid]);
+    
+    // Log denial
+    require_once($CFG->dirroot . '/local/customreg/lib.php');
+    local_customreg_log($userid, 'denied', 'Registration request denied.');
     
     // Optional: Delete existing files to save space and avoid confusion
     $fs = get_file_storage();
@@ -38,12 +71,12 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('manageusers', 'local_customreg'));
 
 // Search Bar
-echo '<div class="mb-4">';
-echo '<form action="'.$PAGE->url.'" method="get" class="form-inline">';
-echo '<input type="text" name="search" class="form-control mr-sm-2" placeholder="Search by name or email" value="'.s($search).'">';
+echo '<div class="mb-4 d-flex justify-content-end">';
+echo '<form action="'.$PAGE->url.'" method="get" class="form-inline d-flex">';
+echo '<input type="text" name="search" class="form-control me-2 mr-2" placeholder="Search by name or email" value="'.s($search).'">';
 echo '<button type="submit" class="btn btn-primary">'.get_string('searchusers', 'local_customreg').'</button>';
 if ($search) {
-    echo ' <a href="'.$PAGE->url.'" class="btn btn-secondary ml-2">Clear</a>';
+    echo ' <a href="'.$PAGE->url.'" class="btn btn-secondary ms-2 ml-2">Clear</a>';
 }
 echo '</form>';
 echo '</div>';
@@ -117,6 +150,13 @@ if (!$records) {
             $denyurl = new moodle_url($PAGE->url, ['action' => 'deny', 'userid' => $rec->userid, 'sesskey' => sesskey()]);
             $actions[] = $OUTPUT->action_icon($denyurl, new pix_icon('i/invalid', get_string('deny', 'local_customreg')));
         }
+        
+        // Addition: Log History Icon
+        $actions[] = html_writer::link('#', $OUTPUT->pix_icon('i/menu', 'View Timeline'), [
+            'class' => 'view-log-trigger',
+            'data-userid' => $rec->userid,
+            'title' => 'Registration Timeline'
+        ]);
 
         $table->data[] = [
             $userlink . '<br><small>' . s($rec->email) . '</small>',
@@ -132,14 +172,14 @@ if (!$records) {
     echo $OUTPUT->paging_bar($totalcount, $page, $perpage, $PAGE->url);
 }
 
-// Modal HTML for in-page preview
+// Modal HTML for Identity Document Preview
 echo '
 <div class="modal fade" id="idPreviewModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <div class="modal-header d-flex justify-content-between align-items-center">
-        <h5 class="modal-title">Identity Document Preview</h5>
-        <div id="imageControls" style="display:none;">
+      <div class="modal-header d-flex justify-content-between align-items-center flex-wrap">
+        <h5 class="modal-title mr-3">Identity Document Preview</h5>
+        <div id="imageControls" style="display:none;" class="mx-auto">
             <button type="button" class="btn btn-outline-secondary btn-sm" id="zoomOut"><i class="fa fa-search-minus"></i></button>
             <button type="button" class="btn btn-outline-secondary btn-sm" id="zoomIn"><i class="fa fa-search-plus"></i></button>
             <button type="button" class="btn btn-outline-secondary btn-sm" id="resetZoom">Reset</button>
@@ -148,11 +188,29 @@ echo '
             <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body p-0" style="overflow: auto; height: 70vh; background: #f8f9fa; position: relative;">
+      <div class="modal-body p-0" style="overflow: auto; height: 70vh; background: #f8f9fa;">
         <iframe id="previewIframe" src="" style="width:100%; height:100%; border:none; display:none;"></iframe>
         <div id="imageWrap" style="display:none; text-align:center; height:100%;">
             <img id="previewImage" src="" style="max-width:100%; transform-origin: top center; transition: transform 0.2s;">
         </div>
+      </div>
+    </div>
+  </div>
+</div>';
+
+// Modal HTML for Timeline Log
+echo '
+<div class="modal fade" id="logTimelineModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Registration Timeline</h5>
+        <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="logTimelineBody" style="max-height: 60vh; overflow-y: auto;">
+        Loading...
       </div>
     </div>
   </div>
@@ -163,6 +221,47 @@ $PAGE->requires->js_amd_inline("
 require(['jquery'], function($) {
     var zoomLevel = 1;
 
+    // Timeline Log Logic
+    $('.view-log-trigger').on('click', function(e) {
+        e.preventDefault();
+        var userid = $(this).attr('data-userid');
+        $('#logTimelineBody').html('<div class=\"text-center\"><i class=\"fa fa-spinner fa-spin\"></i> Loading...</div>');
+        
+        // Show modal (BS detection)
+        if (typeof($.fn.modal) !== 'undefined') {
+            $('#logTimelineModal').modal('show');
+        } else {
+            console.error('Modal library not found');
+        }
+
+        $.get('manage.php', {action: 'getlogs', userid: userid}, function(data) {
+            if (data.length === 0) {
+                $('#logTimelineBody').html('<div class=\"alert alert-info\">No logs found for this user.</div>');
+                return;
+            }
+            var html = '<ul class=\"list-group list-group-flush\">';
+            $.each(data, function(i, log) {
+                var badgeClass = 'secondary';
+                if (log.action.toLowerCase() === 'approved') badgeClass = 'success';
+                if (log.action.toLowerCase() === 'denied') badgeClass = 'danger';
+                if (log.action.toLowerCase() === 'raised') badgeClass = 'primary';
+                if (log.action.toLowerCase() === 'uploaded') badgeClass = 'info';
+
+                html += '<li class=\"list-group-item px-1 border-bottom\">' +
+                        '<div class=\"d-flex justify-content-between align-items-center mb-1\">' +
+                        '<strong><span class=\"badge badge-' + badgeClass + ' bg-' + badgeClass + '\">' + log.action + '</span></strong>' +
+                        '<small class=\"text-muted text-right\">' + log.date + '</small>' +
+                        '</div>' +
+                        '<div class=\"small\">' + log.details + '</div>' +
+                        '<div class=\"small text-muted\"><em>By: ' + log.admin + '</em></div>' +
+                        '</li>';
+            });
+            html += '</ul>';
+            $('#logTimelineBody').html(html);
+        });
+    });
+
+    // Identity Preview Modal Logic
     $('.view-id-trigger').on('click', function(e) {
         e.preventDefault();
         var url = $(this).attr('data-url');

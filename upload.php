@@ -53,6 +53,10 @@ if ($data = $mform->get_data()) {
     $DB->set_field('local_customreg', 'status', 'pending', ['userid' => $USER->id]);
     $DB->set_field('local_customreg', 'timemodified', time(), ['userid' => $USER->id]);
 
+    // Log the upload
+    require_once($CFG->dirroot . '/local/customreg/lib.php');
+    local_customreg_log($USER->id, 'uploaded', 'User uploaded a new document for identification.');
+
     echo $OUTPUT->header();
     echo $OUTPUT->notification('Document uploaded successfully.', 'notifysuccess');
     echo $OUTPUT->heading('Awaiting Administrator Review');

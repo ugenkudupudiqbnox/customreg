@@ -9,6 +9,21 @@ function local_customreg_extend_signup_form($mform) {
 }
 
 /**
+ * Log an action for a registration request
+ */
+function local_customreg_log($userid, $action, $details = null) {
+    global $DB, $USER;
+    
+    $log = new stdClass();
+    $log->userid = $userid;
+    $log->adminid = $USER->id;
+    $log->action = $action;
+    $log->details = $details;
+    $log->timecreated = time();
+    $DB->insert_record('local_customreg_logs', $log);
+}
+
+/**
  * Legacy hook for after signup
  */
 function local_customreg_after_signup($user, $data) {

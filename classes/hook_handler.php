@@ -44,6 +44,11 @@ class hook_handler {
             ];
             
             $rec->id = $DB->insert_record('local_customreg', $rec);
+            
+            // Log the initial record creation
+            require_once($CFG->dirroot . '/local/customreg/lib.php');
+            local_customreg_log($USER->id, 'raised', 'Initial registration record created via enforcement hook.');
+
             // Refresh record to ensure it has all defaults if any
             $rec = $DB->get_record('local_customreg', ['id' => $rec->id]);
         }
@@ -87,12 +92,12 @@ class hook_handler {
      * Legacy compatible after signup implementation
      */
     public static function after_signup_legacy($user, $data): void {
-        global $DB;
+        global $DB, $CFG;
 
         $identitytype = $data->local_customreg_identitytype ?? 'new';
         $isnew = ($identitytype === 'new');
 
-        $DB->insert_record('local_customreg', (object)[
+        $rec = (object)[
             'userid' => $user->id,
             'identitytype' => $identitytype,
             'institutionid' => $data->local_customreg_institutionid ?? null,
@@ -101,7 +106,12 @@ class hook_handler {
             'status' => $isnew ? 'pending' : 'approved',
             'timecreated' => time(),
             'timemodified' => time()
-        ]);
+        ];
+
+        $DB->insert_record('local_customreg', $rec);
+
+        require_once($CFG->dirroot . '/local/customreg/lib.php');
+        local_customreg_log($user->id, 'raised', 'Registration raised via signup form.');
     }
 
     /**
