@@ -20,6 +20,7 @@
 5. Always purge caches after code changes.
 6. Restart PHP-FPM after replacing plugin files.
 7. Do NOT uninstall plugin unless full cleanup is intended.
+8. Always bump version when a new plugin zip file is created or code is commited/pushed into github repo.
 
 ---
 
