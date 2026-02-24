@@ -62,22 +62,6 @@ class hook_handler {
         }
     }
 
-        // Allow upload.php and standard assets
-        if (strpos($path, '/local/customreg/upload.php') !== false) {
-            return;
-        }
-
-        if ($rec->documentrequired == 1) {
-            if ($rec->documentuploaded == 0) {
-                redirect(new moodle_url('/local/customreg/upload.php'));
-            }
-
-            if ($rec->status !== 'approved') {
-                throw new \moodle_exception('pendingapproval', 'local_customreg');
-            }
-        }
-    }
-
     /**
      * Handle signup audit and document requirements
      */
