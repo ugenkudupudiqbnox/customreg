@@ -72,19 +72,13 @@ echo $OUTPUT->heading(get_string('manageusers', 'local_customreg'));
 
 // Search Bar
 echo '<div class="mb-4 d-flex justify-content-end">';
-echo '<form action="'.$PAGE->url.'" method="get" class="form-inline">';
-echo '<div class="input-group">';
-echo '<input type="text" name="search" class="form-control" placeholder="Search by name or email" value="'.s($search).'">';
-echo '<div class="input-group-append">';
-echo '<button type="submit" class="btn btn-primary" title="'.s(get_string('searchusers', 'local_customreg')).'"><i class="fa fa-search"></i></button>';
-echo '</div>';
-if ($search) {
-    echo '<div class="input-group-append ml-2 ms-2">';
-    echo '<a href="'.$PAGE->url.'" class="btn btn-secondary">Clear</a>';
-    echo '</div>';
-}
-echo '</div>';
-echo '</form>';
+echo $OUTPUT->render_from_template('core/search_input', [
+    'action' => $PAGE->url->out(false),
+    'name' => 'search',
+    'value' => $search,
+    'placeholder' => get_string('searchusers', 'local_customreg'),
+    'viewid' => 'search-users-input'
+]);
 echo '</div>';
 
 // Build SQL
@@ -176,145 +170,110 @@ if (!$records) {
     echo $OUTPUT->paging_bar($totalcount, $page, $perpage, $PAGE->url);
 }
 
-// Modal HTML for Identity Document Preview
-echo '
-<div class="modal fade" id="idPreviewModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header d-flex justify-content-between align-items-center flex-wrap">
-        <h5 class="modal-title mr-3">Identity Document Preview</h5>
-        <div id="imageControls" style="display:none;" class="mx-auto">
-            <button type="button" class="btn btn-outline-secondary btn-sm" id="zoomOut"><i class="fa fa-search-minus"></i></button>
-            <button type="button" class="btn btn-outline-secondary btn-sm" id="zoomIn"><i class="fa fa-search-plus"></i></button>
-            <button type="button" class="btn btn-outline-secondary btn-sm" id="resetZoom">Reset</button>
-        </div>
-        <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body p-0" style="overflow: auto; height: 70vh; background: #f8f9fa;">
-        <iframe id="previewIframe" src="" style="width:100%; height:100%; border:none; display:none;"></iframe>
-        <div id="imageWrap" style="display:none; text-align:center; height:100%;">
-            <img id="previewImage" src="" style="max-width:100%; transform-origin: top center; transition: transform 0.2s;">
-        </div>
-      </div>
-    </div>
-  </div>
-</div>';
-
-// Modal HTML for Timeline Log
-echo '
-<div class="modal fade" id="logTimelineModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header d-flex justify-content-between align-items-center">
-        <h5 class="modal-title m-0">Registration Timeline</h5>
-        <button type="button" class="close ml-auto ms-auto" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" style="float: right;">
-            <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" id="logTimelineBody" style="max-height: 60vh; overflow-y: auto;">
-        Loading...
-      </div>
-    </div>
-  </div>
-</div>';
-
 // JavaScript to handle the click and update the modal using Moodle standard AMD
 $PAGE->requires->js_amd_inline("
-require(['jquery'], function($) {
+require(['jquery', 'core/modal_factory', 'core/modal_events'], function($, ModalFactory, ModalEvents) {
     var zoomLevel = 1;
+    var timelineModal = null;
+    var previewModal = null;
 
-    // Timeline Log Logic
-    $('.view-log-trigger').on('click', function(e) {
-        e.preventDefault();
-        var userid = $(this).attr('data-userid');
-        $('#logTimelineBody').html('<div class=\"text-center\"><i class=\"fa fa-spinner fa-spin\"></i> Loading...</div>');
-        
-        // Show modal (BS detection)
-        if (typeof($.fn.modal) !== 'undefined') {
-            $('#logTimelineModal').modal('show');
-        } else {
-            console.error('Modal library not found');
-        }
+    // --- Timeline Log Logic ---
+    ModalFactory.create({
+        title: 'Registration Timeline',
+        type: ModalFactory.types.DEFAULT,
+    }).then(function(modal) {
+        timelineModal = modal;
+        $('.view-log-trigger').on('click', function(e) {
+            e.preventDefault();
+            var userid = $(this).attr('data-userid');
+            timelineModal.setBody('<div class=\"text-center\"><i class=\"fa fa-spinner fa-spin\"></i> Loading...</div>');
+            timelineModal.show();
 
-        $.get('manage.php', {action: 'getlogs', userid: userid}, function(data) {
-            if (data.length === 0) {
-                $('#logTimelineBody').html('<div class=\"alert alert-info\">No logs found for this user.</div>');
-                return;
-            }
-            var html = '<ul class=\"list-group list-group-flush\">';
-            $.each(data, function(i, log) {
-                var badgeClass = 'secondary';
-                if (log.action.toLowerCase() === 'approved') badgeClass = 'success';
-                if (log.action.toLowerCase() === 'denied') badgeClass = 'danger';
-                if (log.action.toLowerCase() === 'raised') badgeClass = 'primary';
-                if (log.action.toLowerCase() === 'uploaded') badgeClass = 'info';
+            $.get('manage.php', {action: 'getlogs', userid: userid}, function(data) {
+                if (data.length === 0) {
+                    timelineModal.setBody('<div class=\"alert alert-info\">No logs found for this user.</div>');
+                    return;
+                }
+                var html = '<ul class=\"list-group list-group-flush\">';
+                $.each(data, function(i, log) {
+                    var badgeClass = 'secondary';
+                    if (log.action.toLowerCase() === 'approved') badgeClass = 'success';
+                    if (log.action.toLowerCase() === 'denied') badgeClass = 'danger';
+                    if (log.action.toLowerCase() === 'raised') badgeClass = 'primary';
+                    if (log.action.toLowerCase() === 'uploaded') badgeClass = 'info';
 
-                html += '<li class=\"list-group-item px-1 border-bottom\">' +
-                        '<div class=\"d-flex justify-content-between align-items-center mb-1\">' +
-                        '<strong><span class=\"badge badge-' + badgeClass + ' bg-' + badgeClass + '\">' + log.action + '</span></strong>' +
-                        '<small class=\"text-muted text-right\">' + log.date + '</small>' +
-                        '</div>' +
-                        '<div class=\"small\">' + log.details + '</div>' +
-                        '<div class=\"small text-muted\"><em>By: ' + log.admin + '</em></div>' +
-                        '</li>';
+                    html += '<li class=\"list-group-item px-1 border-bottom\">' +
+                            '<div class=\"d-flex justify-content-between align-items-center mb-1\">' +
+                            '<strong><span class=\"badge badge-' + badgeClass + ' bg-' + badgeClass + '\">' + log.action + '</span></strong>' +
+                            '<small class=\"text-muted text-right\">' + log.date + '</small>' +
+                            '</div>' +
+                            '<div class=\"small\">' + log.details + '</div>' +
+                            '<div class=\"small text-muted\"><em>By: ' + log.admin + '</em></div>' +
+                            '</li>';
+                });
+                html += '</ul>';
+                timelineModal.setBody(html);
             });
-            html += '</ul>';
-            $('#logTimelineBody').html(html);
         });
     });
 
-    // Identity Preview Modal Logic
-    $('.view-id-trigger').on('click', function(e) {
-        e.preventDefault();
-        var url = $(this).attr('data-url');
-        var isImage = url.match(/\.(jpg|jpeg|png|gif|webp)/i);
+    // --- Identity Preview Modal Logic ---
+    ModalFactory.create({
+        title: 'Identity Document Preview',
+        type: ModalFactory.types.LARGE,
+    }).then(function(modal) {
+        previewModal = modal;
         
-        zoomLevel = 1;
-        $('#previewImage').css('transform', 'scale(1)');
+        $('.view-id-trigger').on('click', function(e) {
+            e.preventDefault();
+            var url = $(this).attr('data-url');
+            var isImage = url.match(/\.(jpg|jpeg|png|gif|webp)/i);
+            zoomLevel = 1;
 
-        if (isImage) {
-            $('#previewIframe').hide().attr('src', '');
-            $('#imageWrap').show();
-            $('#previewImage').attr('src', url);
-            $('#imageControls').show();
-        } else {
-            $('#imageWrap').hide();
-            $('#previewImage').attr('src', '');
-            $('#imageControls').hide();
-            $('#previewIframe').show().attr('src', url);
-        }
-        
-        var modalEl = document.getElementById('idPreviewModal');
-        if (window.bootstrap && window.bootstrap.Modal) {
-            var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-            modal.show();
-        } else if ($(modalEl).modal) {
-            $(modalEl).modal('show');
-        }
-    });
+            var body = $('<div style=\"height: 70vh; display: flex; flex-direction: column;\"></div>');
+            
+            // Add Controls if image
+            if (isImage) {
+                var controls = $('<div class=\"mb-2 text-center\">' +
+                    '<button type=\"button\" class=\"btn btn-outline-secondary btn-sm mr-1\" id=\"modalZoomOut\"><i class=\"fa fa-search-minus\"></i></button>' +
+                    '<button type=\"button\" class=\"btn btn-outline-secondary btn-sm mr-1\" id=\"modalZoomIn\"><i class=\"fa fa-search-plus\"></i></button>' +
+                    '<button type=\"button\" class=\"btn btn-outline-secondary btn-sm\" id=\"modalReset\">Reset</button>' +
+                '</div>');
+                body.append(controls);
+                
+                var wrap = $('<div style=\"flex-grow: 1; overflow: auto; background: #f8f9fa; text-align: center;\"></div>');
+                var img = $('<img id=\"modalPreviewImage\" src=\"' + url + '\" style=\"max-width: 100%; transform-origin: top center; transition: transform 0.2s;\">');
+                wrap.append(img);
+                body.append(wrap);
+            } else {
+                var iframe = $('<iframe src=\"' + url + '\" style=\"width: 100%; flex-grow: 1; border: none;\"></iframe>');
+                body.append(iframe);
+            }
 
-    $('#zoomIn').on('click', function() {
-        zoomLevel += 0.2;
-        $('#previewImage').css('transform', 'scale(' + zoomLevel + ')');
-    });
+            previewModal.setBody(body);
+            previewModal.show();
 
-    $('#zoomOut').on('click', function() {
-        if (zoomLevel > 0.4) {
-            zoomLevel -= 0.2;
-            $('#previewImage').css('transform', 'scale(' + zoomLevel + ')');
-        }
-    });
+            // Bind zoom events after the body is inserted
+            $('#modalZoomIn').on('click', function() {
+                zoomLevel += 0.2;
+                $('#modalPreviewImage').css('transform', 'scale(' + zoomLevel + ')');
+            });
+            $('#modalZoomOut').on('click', function() {
+                if (zoomLevel > 0.4) {
+                    zoomLevel -= 0.2;
+                    $('#modalPreviewImage').css('transform', 'scale(' + zoomLevel + ')');
+                }
+            });
+            $('#modalReset').on('click', function() {
+                zoomLevel = 1;
+                $('#modalPreviewImage').css('transform', 'scale(1)');
+            });
+        });
 
-    $('#resetZoom').on('click', function() {
-        zoomLevel = 1;
-        $('#previewImage').css('transform', 'scale(1)');
-    });
-    
-    $('#idPreviewModal').on('hidden.bs.modal', function () {
-        $('#previewIframe').attr('src', '');
-        $('#previewImage').attr('src', '');
+        // Clear when closed
+        previewModal.getRoot().on(ModalEvents.hidden, function() {
+            previewModal.setBody('');
+        });
     });
 });
 ");
