@@ -1,5 +1,4 @@
 <?php
-defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = '自定义注册课程设置';
 $string['pendingapproval'] = '您的注册正在等待审批。';
@@ -44,3 +43,19 @@ $string['course3'] = '第三门课程';
 $string['course4'] = '第四门课程';
 $string['course5'] = '第五门课程';
 $string['selectacourse'] = '选择一门课程';
+
+$string['admin_comments'] = '管理员说明';
+$string['deny_with_reason'] = '拒绝并说明理由';
+$string['email_admin_subject'] = '新身份证明上传：{$a->username}';
+$string['email_admin_body'] = '用户 {$a->username} 已上传身份证明供审核。\n您可以在此处审核请求：{$a->url}';
+$string['email_approved_subject'] = '课程注册已通过';
+$string['email_approved_body'] = '您好 {$a->firstname}：\n\n您的注册已获批准。您已加入以下课程：\n{$a->courses}\n\n管理员说明：{$a->comments}\n\n您现在可以登录并访问您的课程。';
+$string['email_rejected_subject'] = '注册被拒绝';
+$string['email_rejected_body'] = '您好 {$a->firstname}：\n\n很抱歉，您的注册已被拒绝。\n\n管理员说明：{$a->comments}\n\n请登录并按照说明重新上传您的材料。';
+$string['email_course_approved_subject'] = '课程注册已通过：{$a->coursename}';
+$string['email_course_approved_body'] = '您好 {$a->firstname}：\n\n您加入课程“{$a->coursename}”的请求已获批准。\n\n管理员说明：{$a->comments}\n\n您现在可以访问该课程。';
+$string['notapplicable'] = '不适用';
+$string['default_approve_comment'] = '经过我们人工审核，您的注册已获批准。';
+$string['default_deny_comment'] = '您的材料不足或不符合我们的要求。';
+$string['default_approve_course_comment'] = '您在该课程的注册已获批准。';
+$string['default_deny_course_comment'] = '您不符合此特定课程的先决条件或要求。';

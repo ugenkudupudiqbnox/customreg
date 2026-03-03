@@ -1,5 +1,4 @@
 <?php
-defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'کسٹم رجسٹریشن کے لیے کورس کی ترتیبات';
 $string['pendingapproval'] = 'آپ کی رجسٹریشن منظوری کے لیے زیر التوا ہے۔';
@@ -44,3 +43,19 @@ $string['course3'] = 'تیسرا کورس';
 $string['course4'] = 'چوتھا کورس';
 $string['course5'] = 'پانچواں کورس';
 $string['selectacourse'] = 'ایک کورس منتخب کریں';
+
+$string['admin_comments'] = 'ایڈمن تبصرے';
+$string['deny_with_reason'] = 'وجہ کے ساتھ مسترد کریں';
+$string['email_admin_subject'] = 'نیا شناختی کارڈ اپ لوڈ: {$a->username}';
+$string['email_admin_body'] = 'صارف {$a->username} نے جائزے کے لیے اپنا شناختی کارڈ اپ لوڈ کیا ہے۔\nآپ یہاں درخواست کا جائزہ لے سکتے ہیں: {$a->url}';
+$string['email_approved_subject'] = 'کورس میں داخلہ منظور';
+$string['email_approved_body'] = 'ہیلو {$a->firstname}،\n\nآپ کی رجسٹریشن منظور کر لی گئی ہے۔ آپ کو درج ذیل کورسز میں داخل کیا گیا ہے:\n{$a->courses}\n\nایڈمن تبصرے: {$a->comments}\n\nاب آپ لاگ ان کر سکتے ہیں اور اپنے کورسز تک رسائی حاصل کر سکتے ہیں۔';
+$string['email_rejected_subject'] = 'رجسٹریشن مسترد';
+$string['email_rejected_body'] = 'ہیلو {$a->firstname}،\n\nبدقسمتی سے، آپ کی رجسٹریشن مسترد کر دی گئی ہے۔\n\nایڈمن تبصرے: {$a->comments}\n\nبراہ کرم لاگ ان کریں اور اپنی دستاویزات دوبارہ اپ لوڈ کرنے کے لیے ہدایات پر عمل کریں۔';
+$string['email_course_approved_subject'] = 'کورس میں داخلہ منظور: {$a->coursename}';
+$string['email_course_approved_body'] = 'ہیلو {$a->firstname}،\n\nکورس \"{$a->coursename}\" میں شامل ہونے کی آپ کی درخواست منظور کر لی گئی ہے۔\n\nایڈمن تبصرے: {$a->comments}\n\nاب آپ کورس تک رسائی حاصل کر سکتے ہیں۔';
+$string['notapplicable'] = 'قابل اطلاق نہیں';
+$string['default_approve_comment'] = 'ہمارے مینوئل جائزے کے بعد آپ کی رجسٹریشن منظور کر لی گئی ہے۔';
+$string['default_deny_comment'] = 'آپ کی دستاویزات ناکافی تھیں یا ہماری ضروریات کے مطابق نہیں تھیں۔';
+$string['default_approve_course_comment'] = 'اس کورس میں آپ کا داخلہ منظور کر لیا گیا ہے۔';
+$string['default_deny_course_comment'] = 'آپ اس مخصوص کورس کے لیے مطلوبہ شرائط یا معیار پر پورا نہیں اترتے۔';

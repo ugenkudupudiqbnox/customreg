@@ -1,5 +1,4 @@
 <?php
-defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'കസ്റ്റം രജിസ്ട്രേഷനായുള്ള കോഴ്സ് ക്രമീകരണങ്ങൾ';
 $string['pendingapproval'] = 'നിങ്ങളുടെ രജിസ്ട്രേഷൻ അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നു.';
@@ -44,3 +43,19 @@ $string['course3'] = 'മൂന്നാമത്തെ കോഴ്സ്';
 $string['course4'] = 'നാലാമത്തെ കോഴ്സ്';
 $string['course5'] = 'അഞ്ചാമത്തെ കോഴ്സ്';
 $string['selectacourse'] = 'ഒരു കോഴ്സ് തിരഞ്ഞെടുക്കുക';
+
+$string['admin_comments'] = 'അഡ്മിൻ അഭിപ്രായങ്ങൾ';
+$string['deny_with_reason'] = 'കാരണം സഹിതം നിരസിക്കുക';
+$string['email_admin_subject'] = 'പുതിയ ഐഡി അപ്‌ലോഡ്: {$a->username}';
+$string['email_admin_body'] = '{$a->username} എന്ന ഉപയോക്താവ് പരിശോധനയ്ക്കായി ഐഡി അപ്‌ലോഡ് ചെയ്തിട്ടുണ്ട്.\nനിങ്ങൾക്ക് ഇവിടെ അപേക്ഷ പരിശോധിക്കാവുന്നതാണ്: {$a->url}';
+$string['email_approved_subject'] = 'കോഴ്സ് എൻറോൾമെന്റ് അംഗീകരിച്ചു';
+$string['email_approved_body'] = 'ഹലോ {$a->firstname},\n\nനിങ്ങളുടെ രജിസ്ട്രേഷൻ അംഗീകരിച്ചു. താഴെ പറയുന്ന കോഴ്സുകളിൽ നിങ്ങൾ എൻറോൾ ചെയ്യപ്പെട്ടിട്ടുണ്ട്:\n{$a->courses}\n\nഅഡ്മിൻ അഭിപ്രായങ്ങൾ: {$a->comments}\n\nനിങ്ങൾക്ക് ഇപ്പോൾ ലോഗിൻ ചെയ്യാനും കോഴ്സുകൾ കാണാനും കഴியும்.';
+$string['email_rejected_subject'] = 'രജിസ്ട്രേഷൻ നിരസിച്ചു';
+$string['email_rejected_body'] = 'ഹലോ {$a->firstname},\n\nനിർഭാഗ്യവശാൽ, നിങ്ങളുടെ രജിസ്ട്രേഷൻ നിരസിക്കപ്പെട്ടു.\n\nഅഡ്മിൻ അഭിപ്രായങ്ങൾ: {$a->comments}\n\nദയവായ് ലോഗിன் ചെയ്ത് രേഖകൾ വീണ്ടും അപ്‌ലോഡ് ചെയ്യുന്നതിനുള്ള നിർദ്ദേശങ്ങൾ പാലിക്കുക.';
+$string['email_course_approved_subject'] = 'കോഴ്സ് എൻറോൾമെന്റ് അംഗീകരിച്ചു: {$a->coursename}';
+$string['email_course_approved_body'] = 'ഹലോ {$a->firstname},\n\n\"{$a->coursename}\" എന്ന കോഴ്സിൽ ചേരാനുള്ള നിങ്ങളുടെ അപേക്ഷ അംഗീകരിച്ചു.\n\nഅഡ്മിൻ അഭിപ്രായങ്ങൾ: {$a->comments}\n\nനിങ്ങൾക്ക് ഇപ്പോൾ കോഴ്സ് കാണാൻ കഴியும்.';
+$string['notapplicable'] = 'ബാധകമല്ല';
+$string['default_approve_comment'] = 'ഞങ്ങളുടെ മാനുവൽ പരിശോധനയ്ക്ക് ശേഷം നിങ്ങളുടെ രജിസ്ട്രേഷൻ അംഗീകരിച്ചു.';
+$string['default_deny_comment'] = 'നിങ്ങളുടെ രേഖകൾ അപര്യാപ്തമാണ് അല്ലെങ്കിൽ ഞങ്ങളുടെ ആവശ്യകതകളുമായി പൊരുത്തപ്പെടുന്നില്ല.';
+$string['default_approve_course_comment'] = 'ഈ കോഴ്സിലേക്കുള്ള നിങ്ങളുടെ എൻറോൾമെന്റ് അംഗീകരിച്ചു.';
+$string['default_deny_course_comment'] = 'ഈ നിർദ്ദിഷ്ട കോഴ്സിന് ആവശ്യമായ മാനണ്ഡങ്ങളോ യോഗ്യതകളോ നിങ്ങൾ പാലിക്കുന്നില്ല.';

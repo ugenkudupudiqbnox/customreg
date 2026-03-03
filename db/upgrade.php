@@ -51,5 +51,16 @@ function xmldb_local_customreg_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026022432, 'local', 'customreg');
     }
 
+    if ($oldversion < 2026030401) {
+        $table = new xmldb_table('local_customreg');
+        $field = new xmldb_field('admin_comments', XMLDB_TYPE_TEXT, null, null, null, null, null, 'timemodified');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026030401, 'local', 'customreg');
+    }
+
     return true;
 }

@@ -1,5 +1,4 @@
 <?php
-defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Configurações de curso para Registro Personalizado';
 $string['pendingapproval'] = 'O seu registro está pendente de aprovação.';
@@ -44,3 +43,19 @@ $string['course3'] = 'Terceiro curso';
 $string['course4'] = 'Quarto curso';
 $string['course5'] = 'Quinto curso';
 $string['selectacourse'] = 'Selecione um curso';
+
+$string['admin_comments'] = 'Comentários do administrador';
+$string['deny_with_reason'] = 'Rejeitar com motivo';
+$string['email_admin_subject'] = 'Novo carregamento de ID: {$a->username}';
+$string['email_admin_body'] = 'O utilizador {$a->username} carregou a sua identificação para revisão.\nPode rever o pedido aqui: {$a->url}';
+$string['email_approved_subject'] = 'Inscrição no curso aprovada';
+$string['email_approved_body'] = 'Olá {$a->firstname},\n\nO seu registo foi aprovado. Foi inscrito nos seguintes cursos:\n{$a->courses}\n\nComentários do administrador: {$a->comments}\n\nPode agora iniciar sessão e aceder aos seus cursos.';
+$string['email_rejected_subject'] = 'Registo rejeitado';
+$string['email_rejected_body'] = 'Olá {$a->firstname},\n\nInfelizmente, o seu registo foi rejeitado.\n\nComentários do administrador: {$a->comments}\n\nInicie sessão e siga as instruções para voltar a carregar a sua documentação.';
+$string['email_course_approved_subject'] = 'Inscrição no curso aprovada: {$a->coursename}';
+$string['email_course_approved_body'] = 'Olá {$a->firstname},\n\nO seu pedido para aderir ao curso \"{$a->coursename}\" foi aprovado.\n\nComentários do administrador: {$a->comments}\n\nPode agora aceder ao curso.';
+$string['notapplicable'] = 'N/A';
+$string['default_approve_comment'] = 'O seu registo foi aprovado após a nossa revisão manual.';
+$string['default_deny_comment'] = 'A sua documentação foi insuficiente ou não correspondeu aos nossos requisitos.';
+$string['default_approve_course_comment'] = 'A sua inscrição neste curso foi aprovada.';
+$string['default_deny_course_comment'] = 'Não cumpre os pré-requisitos ou critérios necessários para este curso específico.';

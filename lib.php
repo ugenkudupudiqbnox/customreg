@@ -37,6 +37,75 @@ function local_customreg_log($userid, $action, $details = null) {
 }
 
 /**
+ * Notify site administrators about new ID upload
+ */
+function local_customreg_notify_admins_new_upload($userid) {
+    global $DB, $CFG;
+
+    $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
+    $admins = get_admins();
+    foreach ($admins as $admin) {
+        $a = new stdClass();
+        $a->username = fullname($user);
+        $a->url = new moodle_url('/local/customreg/manage.php', ['userid' => $userid]);
+        $subject = get_string('email_admin_subject', 'local_customreg', $a);
+        $body = get_string('email_admin_body', 'local_customreg', $a);
+        email_to_user($admin, core_user::get_noreply_user(), $subject, $body);
+    }
+}
+
+/**
+ * Notify user about registration status change
+ */
+function local_customreg_notify_user_status($userid, $status, $comments = '', $courses = []) {
+    global $DB;
+
+    $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
+    $a = new stdClass();
+    $a->firstname = $user->firstname;
+    $a->comments = !empty($comments) ? $comments : get_string('notapplicable', 'local_customreg');
+
+    if ($status === 'approved') {
+        $a->courses = '';
+        if (!empty($courses)) {
+            $coursenames = [];
+            foreach ($courses as $cid) {
+                $c = $DB->get_record('course', ['id' => $cid]);
+                if ($c) $coursenames[] = "- " . $c->fullname;
+            }
+            $a->courses = implode("\n", $coursenames);
+        }
+        $subject = get_string('email_approved_subject', 'local_customreg');
+        $body = get_string('email_approved_body', 'local_customreg', $a);
+    } else {
+        $subject = get_string('email_rejected_subject', 'local_customreg');
+        $body = get_string('email_rejected_body', 'local_customreg', $a);
+    }
+
+    email_to_user($user, core_user::get_noreply_user(), $subject, $body);
+}
+
+/**
+ * Notify user about individual course approval
+ */
+function local_customreg_notify_course_approved($userid, $courseid, $comments = '') {
+    global $DB;
+
+    $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
+    $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
+
+    $a = new stdClass();
+    $a->firstname = $user->firstname;
+    $a->coursename = $course->fullname;
+    $a->comments = !empty($comments) ? $comments : get_string('notapplicable', 'local_customreg');
+
+    $subject = get_string('email_course_approved_subject', 'local_customreg', $a);
+    $body = get_string('email_course_approved_body', 'local_customreg', $a);
+
+    email_to_user($user, core_user::get_noreply_user(), $subject, $body);
+}
+
+/**
  * Legacy hook for after signup
  */
 function local_customreg_after_signup($user, $data) {

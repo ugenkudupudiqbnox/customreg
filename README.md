@@ -9,6 +9,8 @@ A highly robust Moodle plugin designed to enforce identity verification for new 
 - **Decoupled Approval Workflow**: 
   - **Identity Verification**: Approve or deny government-issued IDs.
   - **Granular Enrollment**: Approve or deny individual course requests per user.
+- **Automated Notifications**: Sends custom emails to users when registration or course enrollment status changes.
+- **Admin Communication**: Integrated comment fields in the approval modals with pre-populated, editable default text for faster processing.
 - **Seamless Document Preview**: View uploaded ID images directly within Moodle using Bootstrap modals (no new tabs required).
 - **25+ Languages Supported**: Comprehensive localization for global and regional audiences (including 11+ Indian languages).
 - **Modern Hook Architecture**: Built using the latest Moodle (4.x/5.x) namespaced hooks for maximum compatibility and performance.
@@ -17,11 +19,33 @@ A highly robust Moodle plugin designed to enforce identity verification for new 
 
 ## 🛠 Installation
 
-1. Copy the `customreg` folder into your Moodle install under `/local/`.
-   - Path: `/var/www/moodle/local/customreg/`
-2. Log in as a Site Administrator.
-3. Go to **Site Administration > Notifications** to initiate the database installation.
-4. Follow the prompts to complete the setup.
+Choose one of the following options to install the plugin.
+
+### Option A: Manual Installation (GitHub Checkout)
+Recommended for developers or servers with shell access.
+
+1. Navigate to your Moodle local plugins directory:
+   ```bash
+   cd /var/www/moodle/local/
+   ```
+2. Clone the repository:
+   ```bash
+   git clone https://github.com/ugenkudupudiqbnox/customreg.git customreg
+   ```
+3. Ensure proper permissions:
+   ```bash
+   sudo chown -R www-data:www-data customreg
+   ```
+4. Log in to Moodle as a Site Administrator and go to **Site Administration > Notifications** to complete the database upgrade.
+
+### Option B: Web Installation (ZIP File)
+Recommended for most users.
+
+1. Download the latest version ZIP file from the [GitHub Releases](https://github.com/your-repo/customreg/releases) page.
+2. Log in to Moodle as a Site Administrator.
+3. Navigate to **Site Administration > Plugins > Install plugins**.
+4. Drag and drop the downloaded ZIP file into the **ZIP package** area.
+5. Click **Install plugin from the ZIP file** and follow the on-screen validation and upgrade prompts.
 
 ---
 

@@ -1,5 +1,4 @@
 <?php
-defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'కస్టమ్ రిజిస్ట్రేషన్ కోసం కోర్సు సెట్టింగ్‌లు';
 $string['pendingapproval'] = 'మీ నమోదు ఆమోదం కోసం వేచి ఉంది.';
@@ -44,3 +43,19 @@ $string['course3'] = 'మూడవ కోర్సు';
 $string['course4'] = 'నాల్గవ కోర్సు';
 $string['course5'] = 'ఐదవ కోర్సు';
 $string['selectacourse'] = 'కోర్సును ఎంచుకోండి';
+
+$string['admin_comments'] = 'అడ్మిన్ వ్యాఖ్యలు';
+$string['deny_with_reason'] = 'కారణంతో తిరస్కరించండి';
+$string['email_admin_subject'] = 'కొత్త ఐడి అప్‌లోడ్: {$a->username}';
+$string['email_admin_body'] = 'వినియోగదారు {$a->username} సమీక్ష కోసం తమ ఐడిని అప్‌లోడ్ చేశారు.\nమీరు అభ్యర్థనను ఇక్కడ సమీక్షించవచ్చు: {$a->url}';
+$string['email_approved_subject'] = 'కోర్సు ఎన్‌రోల్‌మెంట్ ఆమోదించబడింది';
+$string['email_approved_body'] = 'హలో {$a->firstname},\n\nమీ రిజిస్ట్రేషన్ ఆమోదించబడింది. మీరు ఈ క్రింది కోర్సులలో ఎన్‌రోల్ చేయబడ్డారు:\n{$a->courses}\n\nఅడ్మిన్ వ్యాఖ్యలు: {$a->comments}\n\nమీరు ఇప్పుడు లాగిన్ చేసి మీ కోర్సులను యాక్సెస్ చేయవచ్చు.';
+$string['email_rejected_subject'] = 'రిజిస్ట్రేషన్ తిరస్కరించబడింది';
+$string['email_rejected_body'] = 'హలో {$a->firstname},\n\nదురదృష్టవశాత్తు, మీ రిజిస్ట్రేషన్ తిరస్కరించబడింది.\n\nఅడ్మిన్ వ్యాఖ్యలు: {$a->comments}\n\nదయచేసి లాగిన్ చేసి, మీ పత్రాలను మళ్లీ అప్‌లోడ్ చేయడానికి సూచనలను అనుసరించండి.';
+$string['email_course_approved_subject'] = 'కోర్సు ఎన్‌రోల్‌మెంట్ ఆమోదించబడింది: {$a->coursename}';
+$string['email_course_approved_body'] = 'హలో {$a->firstname},\n\n\"{$a->coursename}\" కోర్సులో చేరడానికి మీ అభ్యర్థన ఆమోదించబడింది.\n\nఅడ్మిన్ వ్యాఖ్యలు: {$a->comments}\n\nమీరు ఇప్పుడు కోర్సును యాక్సెస్ చేయవచ్చు.';
+$string['notapplicable'] = 'వర్తించదు';
+$string['default_approve_comment'] = 'మా మాన్యువల్ సమీక్ష తర్వాత మీ రిజిస్ట్రేషన్ ఆమోదించబడింది.';
+$string['default_deny_comment'] = 'మీ డాక్యుమెంటేషన్ సరిపోలేదు లేదా మా అవసరాలకు సరిపోలలేదు.';
+$string['default_approve_course_comment'] = 'ఈ కోర్సులో మీ ఎన్‌రోల్‌మెంట్ ఆమోదించబడింది.';
+$string['default_deny_course_comment'] = 'ఈ నిర్దిష్ట కోర్సు కోసం మీరు ముందస్తు అవసరాలు లేదా అవసరమైన ప్రమాణాలను పూర్తి చేయలేదు.';

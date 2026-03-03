@@ -44,3 +44,39 @@ $string['course3'] = 'Third Course';
 $string['course4'] = 'Fourth Course';
 $string['course5'] = 'Fifth Course';
 $string['selectacourse'] = 'Select a course';
+
+$string['admin_comments'] = 'Admin Comments';
+$string['deny_with_reason'] = 'Reject with Reason';
+$string['email_admin_subject'] = 'New ID Upload: {$a->username}';
+$string['email_admin_body'] = 'User {$a->username} has uploaded their ID for review.
+You can review the request here: {$a->url}';
+$string['email_approved_subject'] = 'Course Enrollment Approved';
+$string['email_approved_body'] = 'Hello {$a->firstname},
+
+Your registration has been approved. You have been enrolled in the following courses:
+{$a->courses}
+
+Admin Comments: {$a->comments}
+
+You can now log in and access your courses.';
+$string['email_rejected_subject'] = 'Registration Rejected';
+$string['email_rejected_body'] = 'Hello {$a->firstname},
+
+Unfortunately, your registration has been rejected.
+
+Admin Comments: {$a->comments}
+
+Please log in and follow the instructions to re-upload your documentation.';
+$string['email_course_approved_subject'] = 'Course Enrollment Approved: {$a->coursename}';
+$string['email_course_approved_body'] = 'Hello {$a->firstname},
+
+Your request to join the course "{$a->coursename}" has been approved.
+
+Admin Comments: {$a->comments}
+
+You can now access the course.';
+$string['notapplicable'] = 'N/A';
+$string['default_approve_comment'] = 'Your registration has been approved following our manual review.';
+$string['default_deny_comment'] = 'Your documentation was insufficient or did not match our requirements.';
+$string['default_approve_course_comment'] = 'Your enrollment in this course has been approved.';
+$string['default_deny_course_comment'] = 'You do not meet the prerequisites or required criteria for this specific course.';

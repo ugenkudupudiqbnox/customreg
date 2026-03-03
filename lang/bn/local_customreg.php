@@ -1,5 +1,4 @@
 <?php
-defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'কাস্টম রেজিস্ট্রেশনের জন্য কোর্স সেটিংস';
 $string['pendingapproval'] = 'আপনার রেজিস্ট্রেশন অনুমোদনের জন্য অপেক্ষমান।';
@@ -44,3 +43,19 @@ $string['course3'] = 'তৃতীয় কোর্স';
 $string['course4'] = 'চতুর্থ কোর্স';
 $string['course5'] = 'পঞ্চম কোর্স';
 $string['selectacourse'] = 'একটি কোর্স নির্বাচন করুন';
+
+$string['admin_comments'] = 'অ্যাডমিন মন্তব্য';
+$string['deny_with_reason'] = 'কারণসহ প্রত্যাখ্যান করুন';
+$string['email_admin_subject'] = 'নতুন আইডি আপলোড: {$a->username}';
+$string['email_admin_body'] = 'ব্যবহারকারী {$a->username} পর্যালোচনার জন্য তাদের আইডি আপলোড করেছেন।\nআপনি এখানে অনুরোধটি পর্যালোচনা করতে পারেন: {$a->url}';
+$string['email_approved_subject'] = 'কোর্স এনরোলমেন্ট অনুমোদিত';
+$string['email_approved_body'] = 'হ্যালো {$a->firstname},\n\nআপনার নিবন্ধন অনুমোদিত হয়েছে। আপনি নিম্নলিখিত কোর্সগুলিতে নথিভুক্ত হয়েছেন:\n{$a->courses}\n\nঅ্যাডমিন মন্তব্য: {$a->comments}\n\nআপনি এখন লগ ইন করতে এবং আপনার কোর্সগুলি অ্যাক্সেস করতে পারেন।';
+$string['email_rejected_subject'] = 'নিবন্ধন প্রত্যাখ্যাত';
+$string['email_rejected_body'] = 'হ্যালো {$a->firstname},\n\nদুর্भाग्यবশত, আপনার নিবন্ধন প্রত্যাখ্যাত হয়েছে।\n\nঅ্যাডমিন মন্তব্য: {$a->comments}\n\nঅনুগ্রহ করে লগ ইন করুন এবং আপনার ডকুমেন্টেশন পুনরায় আপলোড করার নির্দেশাবলী অনুসরণ করুন।';
+$string['email_course_approved_subject'] = 'কোর্স এনরোলমেন্ট অনুমোদিত: {$a->coursename}';
+$string['email_course_approved_body'] = 'হ্যালো {$a->firstname},\n\n\"{$a->coursename}\" কোর্সে যোগদানের আপনার অনুরোধ অনুমোদিত হয়েছে।\n\nঅ্যাডমিন মন্তব্য: {$a->comments}\n\nআপনি এখন কোর্সটি অ্যাক্সেস করতে পারেন।';
+$string['notapplicable'] = 'প্রযোজ্য নয়';
+$string['default_approve_comment'] = 'আমাদের ম্যানুয়াল পর্যালোচনার পরে আপনার নিবন্ধন অনুমোদিত হয়েছে।';
+$string['default_deny_comment'] = 'আপনার ডকুমেন্টেশন অপর্যাপ্ত ছিল বা আমাদের প্রয়োজনীয়তার সাথে মেলেনি।';
+$string['default_approve_course_comment'] = 'এই কোর্সে আপনার এনরোলমেন্ট অনুমোদিত হয়েছে।';
+$string['default_deny_course_comment'] = 'আপনি এই নির্দিষ্ট কোর্সের জন্য পূর্বশর্ত বা প্রয়োজনীয় মানদণ্ড পূরণ করেন না। ';

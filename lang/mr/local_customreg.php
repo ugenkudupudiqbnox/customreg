@@ -1,5 +1,4 @@
 <?php
-defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'कस्टम नोंदणीसाठी कोर्स सेटिंग्ज';
 $string['pendingapproval'] = 'तुमची नोंदणी मंजुरीसाठी प्रलंबित आहे.';
@@ -44,3 +43,19 @@ $string['course3'] = 'तिसरा अभ्यासक्रम';
 $string['course4'] = 'चौथा अभ्यासक्रम';
 $string['course5'] = 'पाचवा अभ्यासक्रम';
 $string['selectacourse'] = 'अभ्यासक्रम निवडा';
+
+$string['admin_comments'] = 'अ‍ॅडमिन टिप्पण्या';
+$string['deny_with_reason'] = 'कारणासह नाकारा';
+$string['email_admin_subject'] = 'नवीन आयڈی अपलोड: {$a->username}';
+$string['email_admin_body'] = 'वापरकर्ता {$a->username} ने पुनरावलोकनासाठी त्यांचा आयडी अपलोड केला आहे.\nतुम्ही येथे विनंतीचे पुनरावलोकन करू शकता: {$a->url}';
+$string['email_approved_subject'] = 'कोर्स नोंदणी मंजूर';
+$string['email_approved_body'] = 'नमस्कार {$a->firstname},\n\nतुमची नोंदणी मंजूर झाली आहे. तुमची खालील कोर्सेसमध्ये नोंदणी झाली आहे:\n{$a->courses}\n\nअ‍ॅडमिन टिप्पण्या: {$a->comments}\n\nतुमची नोंदणी मंजूर झाली आहे. आता आपण लॉग इन करू शकता आणि आपल्या कोर्सेसमध्ये प्रवेश करू शकता.';
+$string['email_rejected_subject'] = 'नोंदणी नाकारली';
+$string['email_rejected_body'] = 'नमस्कार {$a->firstname},\n\nदुर्भाग्यवशात्, तुमची नोंदणी नाकारली गेली आहे.\n\nअ‍ॅडमिन टिप्पण्या: {$a->comments}\n\nकृपया लॉग इन करा aur तुमची कागদपत्रे पुन्हा अपलोड करण्यासाठी सूचनांचे पालन करा.';
+$string['email_course_approved_subject'] = 'कोर्स नोंदणी मंजूर: {$a->coursename}';
+$string['email_course_approved_body'] = 'नमस्कार {$a->firstname},\n\n\"{$a->coursename}\" कोर्समध्ये सामील होण्याची तुमची विनंती मंजूर झाली आहे.\n\nअ‍ॅडमिन टिप्पण्या: {$a->comments}\n\nतुम्ही आता कोर्समध्ये प्रवेश करू शकता.';
+$string['notapplicable'] = 'लागू नाही';
+$string['default_approve_comment'] = 'आमच्या మॅन्युअल पुनरावलोकನಾनंतर तुमची नोंदणी मंजूर झाली आहे.';
+$string['default_deny_comment'] = 'तुमची कागदपत्रे अपुरी होती किंवा आमच्या आवश्यकतांशी जुळत नव्हती.';
+$string['default_approve_course_comment'] = 'या कोर्समधील तुमची नोंदणी मंजूर झाली आहे.';
+$string['default_deny_course_comment'] = 'तुम्ही या विशिष्ट कोर्ससाठी आवश्यक अटी किंवा निकष पूर्ण करत नाही.';

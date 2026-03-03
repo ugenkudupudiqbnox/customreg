@@ -1,5 +1,4 @@
 <?php
-defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Impostazioni del corso per la Registrazione Personalizzata';
 $string['pendingapproval'] = 'La tua registrazione è in attesa di approvazione.';
@@ -44,3 +43,19 @@ $string['course3'] = 'Terzo corso';
 $string['course4'] = 'Quarto corso';
 $string['course5'] = 'Quinto corso';
 $string['selectacourse'] = 'Seleziona un corso';
+
+$string['admin_comments'] = 'Commenti dell\'amministratore';
+$string['deny_with_reason'] = 'Rifiuta con motivo';
+$string['email_admin_subject'] = 'Nuovo caricamento ID: {$a->username}';
+$string['email_admin_body'] = 'L\'utente {$a->username} ha caricato il proprio documento d\'identità per la revisione.\nPuoi rivedere la richiesta aqui: {$a->url}';
+$string['email_approved_subject'] = 'Iscrizione al corso approvata';
+$string['email_approved_body'] = 'Buongiorno {$a->firstname},\n\nla tua registrazione è stata approvata. Sei stato iscritto ai seguenti corsi:\n{$a->courses}\n\nCommenti dell\'amministratore: {$a->comments}\n\nOra puoi accedere e visualizzare i tuoi corsi.';
+$string['email_rejected_subject'] = 'Registrazione rifiutata';
+$string['email_rejected_body'] = 'Buongiorno {$a->firstname},\n\npurtroppo la tua registrazione è stata rifiutata.\n\nCommenti dell\'amministratore: {$a->comments}\n\nAccedi e segui le istruzioni per ricaricare la tua documentazione.';
+$string['email_course_approved_subject'] = 'Iscrizione al corso approvata: {$a->coursename}';
+$string['email_course_approved_body'] = 'Buongiorno {$a->firstname},\n\nla tua richiesta di iscrizione al corso \"{$a->coursename}\" è stata approvata.\n\nCommenti dell\'amministratore: {$a->comments}\n\nOra puoi accedere al corso.';
+$string['notapplicable'] = 'N/D';
+$string['default_approve_comment'] = 'La tua registrazione è stata approvata a seguito della nostra revisione manuale.';
+$string['default_deny_comment'] = 'La tua documentazione era insufficiente o non corrispondeva ai nostri requisiti.';
+$string['default_approve_course_comment'] = 'La tua iscrizione a questo corso è stata approvata.';
+$string['default_deny_course_comment'] = 'Non soddisfi i prerequisiti o i criteri richiesti per questo corso specifico.';

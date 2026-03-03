@@ -1,5 +1,4 @@
 <?php
-defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Instellingen voor aangepaste registratiecursussen';
 $string['pendingapproval'] = 'Uw registratie is in afwachting van goedkeuring.';
@@ -44,3 +43,19 @@ $string['course3'] = 'Derde cursus';
 $string['course4'] = 'Vierde cursus';
 $string['course5'] = 'Vijfde cursus';
 $string['selectacourse'] = 'Selecteer een cursus';
+
+$string['admin_comments'] = 'Opmerkingen beheerder';
+$string['deny_with_reason'] = 'Afwijzen met reden';
+$string['email_admin_subject'] = 'Nieuwe ID-upload: {$a->username}';
+$string['email_admin_body'] = 'Gebruiker {$a->username} heeft zijn/haar ID geüpload ter beoordeling.\nU kunt het verzoek hier bekijken: {$a->url}';
+$string['email_approved_subject'] = 'Cursusinschrijving goedgekeurd';
+$string['email_approved_body'] = 'Hallo {$a->firstname},\n\nUw registratie is goedgekeurd. U bent ingeschreven voor de volgende cursussen:\n{$a->courses}\n\nOpmerkingen beheerder: {$a->comments}\n\nU kunt nu inloggen en uw cursussen bekijken.';
+$string['email_rejected_subject'] = 'Registratie afgewezen';
+$string['email_rejected_body'] = 'Hallo {$a->firstname},\n\nHelaas is uw registratie afgewezen.\n\nOpmerkingen beheerder: {$a->comments}\n\nLog in en volg de instructies om uw documentatie opnieuw te uploaden.';
+$string['email_course_approved_subject'] = 'Cursusinschrijving goedgekeurd: {$a->coursename}';
+$string['email_course_approved_body'] = 'Hallo {$a->firstname},\n\nUw verzoek om deel te nemen aan de cursus \"{$a->coursename}\" is goedgekeurd.\n\nOpmerkingen beheerder: {$a->comments}\n\nU hebt nu toegang tot de cursus.';
+$string['notapplicable'] = 'N.v.t.';
+$string['default_approve_comment'] = 'Uw registratie is goedgekeurd na onze handmatige controle.';
+$string['default_deny_comment'] = 'Uw documentatie was onvoldoende of voldeed niet aan onze vereisten.';
+$string['default_approve_course_comment'] = 'Uw inschrijving voor deze cursus is goedgekeurd.';
+$string['default_deny_course_comment'] = 'U voldoet niet aan de instapeisen of vereiste criteria voor deze specifieke cursus.';

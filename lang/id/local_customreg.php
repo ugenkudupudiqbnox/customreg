@@ -1,5 +1,4 @@
 <?php
-defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Pengaturan Kursus untuk Pendaftaran Kustom';
 $string['pendingapproval'] = 'Pendaftaran Anda sedang menunggu persetujuan.';
@@ -44,3 +43,19 @@ $string['course3'] = 'Kursus Ketiga';
 $string['course4'] = 'Kursus Keempat';
 $string['course5'] = 'Kursus Kelima';
 $string['selectacourse'] = 'Pilih kursus';
+
+$string['admin_comments'] = 'Komentar Admin';
+$string['deny_with_reason'] = 'Tolak dengan Alasan';
+$string['email_admin_subject'] = 'Unggahan ID Baru: {$a->username}';
+$string['email_admin_body'] = 'Pengguna {$a->username} telah ununggah ID mereka untuk ditinjau.\nAnda dapat meninjau permintaan di sini: {$a->url}';
+$string['email_approved_subject'] = 'Pendaftaran Kursus Disetujui';
+$string['email_approved_body'] = 'Halo {$a->firstname},\n\nPendaftaran Anda telah disetujui. Anda telah terdaftar di kursus berikut:\n{$a->courses}\n\nKomentar Admin: {$a->comments}\n\nSekarang Anda dapat masuk dan mengakses kursus Anda.';
+$string['email_rejected_subject'] = 'Pendaftaran Ditolak';
+$string['email_rejected_body'] = 'Halo {$a->firstname},\n\nSayangnya, pendaftaran Anda telah ditolak.\n\nKomentar Admin: {$a->comments}\n\nSilakan masuk dan ikuti instruksi untuk mengunggah ulang dokumentasi Anda.';
+$string['email_course_approved_subject'] = 'Pendaftaran Kursus Disetujui: {$a->coursename}';
+$string['email_course_approved_body'] = 'Halo {$a->firstname},\n\nPermintaan Anda untuk bergabung dengan kursus \"{$a->coursename}\" telah disetujui.\n\nKomentar Admin: {$a->comments}\n\nSekarang Anda dapat mengakses kursus tersebut.';
+$string['notapplicable'] = 'N/A';
+$string['default_approve_comment'] = 'Pendaftaran Anda telah disetujui menyusul tinjauan manual kami.';
+$string['default_deny_comment'] = 'Dokumentasi Anda tidak memadai atau tidak sesuai dengan persyaratan kami.';
+$string['default_approve_course_comment'] = 'Pendaftaran Anda di kursus ini telah disetujui.';
+$string['default_deny_course_comment'] = 'Anda tidak memenuhi prasyarat atau kriteria yang diperlukan untuk kursus khusus ini.';

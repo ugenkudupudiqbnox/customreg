@@ -1,5 +1,4 @@
 <?php
-defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'કસ્ટમ નોંધણી માટે કોર્સ સેટિંગ્સ';
 $string['pendingapproval'] = 'તમારી નોંધણી મંજૂરી માટે બાકી છે.';
@@ -44,3 +43,19 @@ $string['course3'] = 'ત્રીજો અભ્યાસક્રમ';
 $string['course4'] = 'ચોથો અભ્યાસક્રમ';
 $string['course5'] = 'પાંચમો અભ્યાસક્રમ';
 $string['selectacourse'] = 'અભ્યાસક્રમ પસંદ કરો';
+
+$string['admin_comments'] = 'એડમિન ટિપ્પણીઓ';
+$string['deny_with_reason'] = 'કારણ સાથે નકારો';
+$string['email_admin_subject'] = 'નવી આઈડી અપલોડ: {$a->username}';
+$string['email_admin_body'] = 'વપરાશકર્તા {$a->username} એ સમીક્ષા માટે તેમનું આઈડી અપલોડ કર્યું છે.\nતમે અહીં વિનંતીની સમીક્ષા કરી શકો છો: {$a->url}';
+$string['email_approved_subject'] = 'કોર્સ એનરોલમેન્ટ મંજૂર';
+$string['email_approved_body'] = 'હેલો {$a->firstname},\n\nતમારી નોંધણી મંજૂર કરવામાં આવી છે. તમે નીચેના અભ્યાસક્રમોમાં નોંધણી કરાવી છે:\n{$a->courses}\n\nએડમિન ટિપ્પણીઓ: {$a->comments}\n\nતમે હવે લોગ ઇન કરી શકો છો અને તમારા અભ્યાસક્રમો જોઈ શકો છો.';
+$string['email_rejected_subject'] = 'નોંધણી નકારવામાં આવી';
+$string['email_rejected_body'] = 'હેલો {$a->firstname},\n\nદુર્ભાગ્યવશ, તમારી નોંધણી નકારવામાં આવી છે.\n\nએડમિન ટિપ્પણીઓ: {$a->comments}\n\nકૃપા કરીને લોગ ઇન કરો અને તમારા દસ્તાવેજો ફરીથી અપલોડ કરવા માટે સૂચનાઓનું પાલન કરો.';
+$string['email_course_approved_subject'] = 'કોર્સ એનરોલમેન્ટ મંજૂર: {$a->coursename}';
+$string['email_course_approved_body'] = 'હેલો {$a->firstname},\n\n\"{$a->coursename}\" કોર્સમાં જોડાવાની તમારી વિનંતી મંજૂર કરવામાં આવી છે.\n\nએડમિન ટિપ્પણીઓ: {$a->comments}\n\nતમે હવે કોર્સ જોઈ શકો છો.';
+$string['notapplicable'] = 'લાગુ પડતું નથી';
+$string['default_approve_comment'] = 'અમારી મેન્યુઅલ સમીક્ષા પછી તમારી નોંધણી મંજૂર કરવામાં આવી છે.';
+$string['default_deny_comment'] = 'તમારા દસ્તાવેજો અપૂરતા હતા અથવા અમારી જરૂરિયાતો સાથે મેળ ખાતા ન હતા.';
+$string['default_approve_course_comment'] = 'આ કોર્સમાં તમારી નોંધણી મંજૂર કરવામાં આવી છે.';
+$string['default_deny_course_comment'] = 'તમે આ વિશિષ્ટ કોર્સ માટે આવશ્યક પૂર્વશરતો અથવા માપદંડોને પૂરા કરતા નથી.';

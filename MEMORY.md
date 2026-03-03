@@ -35,6 +35,7 @@
 - `status` (char 50: 'pending', 'approved', 'rejected')
 - `verifiedby` (int, admin userid)
 - `timeverified` (int, timestamp)
+- `admin_comments` (text)
 
 ### Table: `local_customreg_logs`
 - `userid` (int)
@@ -50,6 +51,29 @@
 | :--- | :--- |
 | `2026022419` | Created `local_customreg` table |
 | `2026022432` | Created `local_customreg_logs` table |
+| `2026030401` | Added `admin_comments` field to `local_customreg` |
+| `2026030402` | UI Refined: Redirected Rejected users back to upload |
+| `2026030403` | v2.1.0: Default Admin Comments, 25 Languages & Email Subject Fix |
+
+---
+
+## Technical Sessions Context
+
+### v2.0.0 Feature Expansion (3-4 March 2026)
+- **Email Notifications**: Integrated `email_to_user` for all status changes.
+- **Events API**: Added `registration_updated` event for Moodle log visibility.
+- **Form Logic**: Implemented `hideIf` in `upload.php` for cleaner user experience.
+- **Multi-Course Approval**: Added logic to approve/deny individual courses within the admin dashboard.
+
+### v2.1.0 Admin UX & Localization
+- **Default Comments**: Populated the admin modal with editable default text (`default_approve_comment`, `default_deny_comment`) to speed up workflow.
+- **AMD Integration**: Used `core/modal_factory` to inject PHP language strings into the JS layer via `js_amd_inline`.
+- **Global Reach**: Localized 15+ new strings for 25 languages (ar, bn, de, es, fr, gu, hi, id, it, ja, kn, ko, ml, mr, nl, or, pa, pt, ru, ta, te, tr, ur, zh_cn).
+- **Subject Standardization**: Changed "Registration Approved" to "Course Enrollment Approved" to better reflect the service intent.
+
+### Production Environment (learn.qbnox.com)
+- **CLI Upgrades**: Large schema changes on this host require `admin/cli/upgrade.php` with `php -d max_input_vars=5000`.
+- **Cache Management**: Always run `purge_caches.php` after deploying new `.php` or `.js` files.
 
 ---
 

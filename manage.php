@@ -42,24 +42,46 @@ if ($action === 'getlogs' && $userid > 0) {
 
 // Handle Approval Action
 if ($action === 'approve' && $userid > 0 && confirm_sesskey()) {
+    $comments = optional_param('comments', '', PARAM_TEXT);
+    if (empty($comments)) {
+        $comments = get_string('default_approve_comment', 'local_customreg');
+    }
     $DB->set_field('local_customreg', 'status', 'approved', ['userid' => $userid]);
+    $DB->set_field('local_customreg', 'admin_comments', $comments, ['userid' => $userid]);
     $DB->set_field('local_customreg', 'timemodified', time(), ['userid' => $userid]);
     
     // Log approval
-    local_customreg_log($userid, 'approved', 'Registration overall approved.');
+    local_customreg_log($userid, 'approved', 'Registration overall approved. Comments: ' . $comments);
     
+    // Notify user
+    $rec = $DB->get_record('local_customreg', ['userid' => $userid]);
+    $courses = json_decode($rec->courseidsjson, true) ?: [];
+    $approved_ids = [];
+    foreach ($courses as $c) {
+        if ($c['status'] === 'approved') $approved_ids[] = $c['id'];
+    }
+    local_customreg_notify_user_status($userid, 'approved', $comments, $approved_ids);
+
     redirect($PAGE->url, get_string('userapproved', 'local_customreg'), 2);
 }
 
 // Handle Deny Action
 if ($action === 'deny' && $userid > 0 && confirm_sesskey()) {
+    $comments = optional_param('comments', '', PARAM_TEXT);
+    if (empty($comments)) {
+        $comments = get_string('default_deny_comment', 'local_customreg');
+    }
     $DB->set_field('local_customreg', 'status', 'rejected', ['userid' => $userid]);
+    $DB->set_field('local_customreg', 'admin_comments', $comments, ['userid' => $userid]);
     $DB->set_field('local_customreg', 'documentuploaded', 0, ['userid' => $userid]);
     $DB->set_field('local_customreg', 'timemodified', time(), ['userid' => $userid]);
     
     // Log denial
-    local_customreg_log($userid, 'rejected', 'Registration request rejected.');
+    local_customreg_log($userid, 'rejected', 'Registration request rejected. Comments: ' . $comments);
     
+    // Notify user
+    local_customreg_notify_user_status($userid, 'rejected', $comments);
+
     // Optional: Delete existing files to save space and avoid confusion
     $fs = get_file_storage();
     $fs->delete_area_files($context->id, 'local_customreg', 'govid', $userid);
@@ -70,6 +92,10 @@ if ($action === 'deny' && $userid > 0 && confirm_sesskey()) {
 // Handle Individual Course Approval
 if ($action === 'approvecourse' && $userid > 0 && confirm_sesskey()) {
     $courseid = required_param('courseid', PARAM_INT);
+    $comments = optional_param('comments', '', PARAM_TEXT);
+    if (empty($comments)) {
+        $comments = get_string('default_approve_course_comment', 'local_customreg');
+    }
     $rec = $DB->get_record('local_customreg', ['userid' => $userid], '*', MUST_EXIST);
     $courses = json_decode($rec->courseidsjson, true) ?: [];
     
@@ -89,7 +115,10 @@ if ($action === 'approvecourse' && $userid > 0 && confirm_sesskey()) {
         if ($c['id'] == $courseid) {
             $c['status'] = 'approved';
             local_customreg_enroll_user_into_course($userid, $courseid);
-            local_customreg_log($userid, 'approvecourse', "Course ID $courseid approved and user enrolled.");
+            local_customreg_log($userid, 'approvecourse', "Course ID $courseid approved and user enrolled. Comments: $comments");
+            
+            // Notify user for single course
+            local_customreg_notify_course_approved($userid, $courseid, $comments);
         }
     }
     
@@ -100,13 +129,17 @@ if ($action === 'approvecourse' && $userid > 0 && confirm_sesskey()) {
 // Handle Individual Course Denial
 if ($action === 'denycourse' && $userid > 0 && confirm_sesskey()) {
     $courseid = required_param('courseid', PARAM_INT);
+    $comments = optional_param('comments', '', PARAM_TEXT);
+    if (empty($comments)) {
+        $comments = get_string('default_deny_course_comment', 'local_customreg');
+    }
     $rec = $DB->get_record('local_customreg', ['userid' => $userid], '*', MUST_EXIST);
     $courses = json_decode($rec->courseidsjson, true) ?: [];
     
     foreach ($courses as &$c) {
         if ($c['id'] == $courseid) {
             $c['status'] = 'rejected';
-            local_customreg_log($userid, 'denycourse', "Course ID $courseid rejected.");
+            local_customreg_log($userid, 'denycourse', "Course ID $courseid rejected. Comments: $comments");
         }
     }
     
@@ -116,16 +149,26 @@ if ($action === 'denycourse' && $userid > 0 && confirm_sesskey()) {
 
 // Handle Bulk Course Approval
 if ($action === 'approveallcourses' && $userid > 0 && confirm_sesskey()) {
+    $comments = optional_param('comments', '', PARAM_TEXT);
+    if (empty($comments)) {
+        $comments = get_string('default_approve_course_comment', 'local_customreg');
+    }
     $rec = $DB->get_record('local_customreg', ['userid' => $userid], '*', MUST_EXIST);
     $courses = json_decode($rec->courseidsjson, true) ?: [];
     
-    require_once($CFG->dirroot . '/local/customreg/lib.php');
+    $newly_approved = [];
     foreach ($courses as &$c) {
         if ($c['status'] === 'pending') {
             $c['status'] = 'approved';
             local_customreg_enroll_user_into_course($userid, $c['id']);
-            local_customreg_log($userid, 'approvecourse', "Course ID {$c['id']} approved via bulk action.");
+            local_customreg_log($userid, 'approvecourse', "Course ID {$c['id']} approved via bulk action. Comments: $comments");
+            $newly_approved[] = $c['id'];
         }
+    }
+
+    if (!empty($newly_approved)) {
+        // Send ONE email for all newly approved courses in bulk
+        local_customreg_notify_user_status($userid, 'approved', $comments, $newly_approved);
     }
     
     $DB->set_field('local_customreg', 'courseidsjson', json_encode($courses), ['id' => $rec->id]);
@@ -185,10 +228,27 @@ if (!$records) {
         $statuscolor = 'badge-warning';
         if ($rec->status === 'approved') {
             $statuscolor = 'badge-success';
-        } else if ($rec->status === 'denied') {
+        } else if ($rec->status === 'denied' || $rec->status === 'rejected') {
             $statuscolor = 'badge-danger';
         }
         $statusbadge = html_writer::tag('span', $statusstr, ['class' => 'badge ' . $statuscolor]);
+
+        // ID Preview Logic
+        $id_with_preview = s($rec->institutionid);
+        if ($rec->documentuploaded) {
+            $fs = get_file_storage();
+            $files = $fs->get_area_files($context->id, 'local_customreg', 'govid', $rec->userid, 'id DESC', false);
+            if ($files) {
+                $file = reset($files);
+                $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(), $file->get_itemid(), $file->get_filepath(), $file->get_filename());
+                
+                $id_with_preview .= ' ' . html_writer::link('#', $OUTPUT->pix_icon('t/preview', 'View ID'), [
+                    'class' => 'view-id-trigger',
+                    'data-url' => $url->out(false),
+                    'title' => 'View ID'
+                ]);
+            }
+        }
 
         // Course Selection Column Logic
         $coursesjson = json_decode($rec->courseidsjson, true) ?: [];
@@ -220,8 +280,8 @@ if (!$records) {
                 $citem = html_writer::tag('div', 
                     $course->fullname . ' ' .
                     html_writer::tag('span', 'Pending', ['class' => 'badge ' . $statusclass]) . ' ' .
-                    $OUTPUT->action_icon($approvecurl, new pix_icon('t/check', 'Approve')) .
-                    $OUTPUT->action_icon($denycurl, new pix_icon('t/delete', 'Deny')),
+                    $OUTPUT->action_icon('#', new pix_icon('t/check', 'Approve'), null, ['class' => 'action-with-comment', 'data-action' => 'approvecourse', 'data-userid' => $rec->userid, 'data-courseid' => $cinfo['id']]) .
+                    $OUTPUT->action_icon('#', new pix_icon('t/delete', 'Deny'), null, ['class' => 'action-with-comment', 'data-action' => 'denycourse', 'data-userid' => $rec->userid, 'data-courseid' => $cinfo['id']]),
                     ['class' => 'mb-1 border-bottom pb-1']
                 );
             } else {
@@ -237,12 +297,7 @@ if (!$records) {
 
         $courseinfo = implode('', $courselist);
         if ($haspending) {
-            $approveallurl = new moodle_url($PAGE->url, [
-                'action' => 'approveallcourses', 
-                'userid' => $rec->userid, 
-                'sesskey' => sesskey()
-            ]);
-            $courseinfo .= html_writer::link($approveallurl, 'Approve All Courses', ['class' => 'btn btn-outline-success btn-sm mt-1']);
+            $courseinfo .= html_writer::link('#', 'Approve All Courses', ['class' => 'btn btn-outline-success btn-sm mt-1 action-with-comment', 'data-action' => 'approveallcourses', 'data-userid' => $rec->userid]);
         }
 
         if (empty($courseinfo)) {
@@ -251,29 +306,9 @@ if (!$records) {
 
         $actions = [];
 
-        // File link with Popup Eye Icon - Moved to Actions
-        if ($rec->documentuploaded) {
-            $fs = get_file_storage();
-            $files = $fs->get_area_files($context->id, 'local_customreg', 'govid', $rec->userid, 'id DESC', false);
-            if ($files) {
-                $file = reset($files);
-                $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(), $file->get_itemid(), $file->get_filepath(), $file->get_filename());
-                
-                // Consolidation: Preview in a Modal instead of a new tab/window
-                $actions[] = html_writer::link('#', $OUTPUT->pix_icon('t/preview', 'View ID'), [
-                    'class' => 'view-id-trigger',
-                    'data-url' => $url->out(false),
-                    'title' => 'View ID'
-                ]);
-            }
-        }
-
         if ($rec->status !== 'approved') {
-            $approveurl = new moodle_url($PAGE->url, ['action' => 'approve', 'userid' => $rec->userid, 'sesskey' => sesskey()]);
-            $actions[] = $OUTPUT->action_icon($approveurl, new pix_icon('t/check', get_string('approve', 'local_customreg')));
-            
-            $denyurl = new moodle_url($PAGE->url, ['action' => 'deny', 'userid' => $rec->userid, 'sesskey' => sesskey()]);
-            $actions[] = $OUTPUT->action_icon($denyurl, new pix_icon('i/invalid', get_string('deny', 'local_customreg')));
+            $actions[] = $OUTPUT->action_icon('#', new pix_icon('t/check', get_string('approve', 'local_customreg')), null, ['class' => 'action-with-comment', 'data-action' => 'approve', 'data-userid' => $rec->userid]);
+            $actions[] = $OUTPUT->action_icon('#', new pix_icon('i/invalid', get_string('deny', 'local_customreg')), null, ['class' => 'action-with-comment', 'data-action' => 'deny', 'data-userid' => $rec->userid]);
         }
         
         // Addition: Log History Icon
@@ -283,9 +318,17 @@ if (!$records) {
             'title' => 'Registration Timeline'
         ]);
 
+        $defaultcomments = [
+            'approve' => get_string('default_approve_comment', 'local_customreg'),
+            'deny' => get_string('default_deny_comment', 'local_customreg'),
+            'approvecourse' => get_string('default_approve_course_comment', 'local_customreg'),
+            'denycourse' => get_string('default_deny_course_comment', 'local_customreg'),
+            'approveallcourses' => get_string('default_approve_course_comment', 'local_customreg'),
+        ];
+
         $table->data[] = [
             $userlink . '<br><small>' . s($rec->email) . '</small>',
-            s($rec->institutionid),
+            $id_with_preview,
             $statusbadge,
             $courseinfo,
             implode(' ', $actions)
@@ -298,11 +341,50 @@ if (!$records) {
 }
 
 // JavaScript to handle the click and update the modal using Moodle standard AMD
+$defaultcommentsjson = json_encode($defaultcomments);
 $PAGE->requires->js_amd_inline("
 require(['jquery', 'core/modal_factory', 'core/modal_events'], function($, ModalFactory, ModalEvents) {
     var zoomLevel = 1;
     var timelineModal = null;
     var previewModal = null;
+    var commentModal = null;
+    var defaultComments = {$defaultcommentsjson};
+
+    // --- Action with Comment Modal ---
+    ModalFactory.create({
+        title: 'Add Admin Comment',
+        type: ModalFactory.types.SAVE_CANCEL,
+        body: '<div class=\"form-group\">' +
+              '<label for=\"admin-comment-input\">Comments / Reason</label>' +
+              '<textarea id=\"admin-comment-input\" class=\"form-control\" rows=\"3\"></textarea>' +
+              '</div>'
+    }).then(function(modal) {
+        commentModal = modal;
+        modal.setSaveButtonText('Submit Action');
+
+        $('.action-with-comment').on('click', function(e) {
+            e.preventDefault();
+            var btn = $(this);
+            var data = btn.data();
+            
+            // Set default comment based on action
+            var defaultText = defaultComments[data.action] || '';
+            $('#admin-comment-input').val(defaultText);
+            
+            modal.show();
+
+            modal.getRoot().on(ModalEvents.save, function() {
+                var comment = $('#admin-comment-input').val();
+                var url = new URL(window.location.href);
+                url.searchParams.set('action', data.action);
+                url.searchParams.set('userid', data.userid);
+                if (data.courseid) url.searchParams.set('courseid', data.courseid);
+                url.searchParams.set('comments', comment);
+                url.searchParams.set('sesskey', M.cfg.sesskey);
+                window.location.href = url.href;
+            });
+        });
+    });
 
     // --- Timeline Log Logic ---
     ModalFactory.create({

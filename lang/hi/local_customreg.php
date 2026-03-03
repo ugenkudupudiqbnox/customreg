@@ -1,5 +1,4 @@
 <?php
-defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'कस्टम पंजीकरण के लिए कोर्स सेटिंग्स';
 $string['pendingapproval'] = 'आपका पंजीकरण अनुमोदन के लिए लंबित है।';
@@ -44,3 +43,19 @@ $string['course3'] = 'तीसरा पाठ्यक्रम';
 $string['course4'] = 'चौथा पाठ्यक्रम';
 $string['course5'] = 'पांचवां पाठ्यक्रम';
 $string['selectacourse'] = 'एक पाठ्यक्रम चुनें';
+
+$string['admin_comments'] = 'व्यवस्थापक टिप्पणियाँ';
+$string['deny_with_reason'] = 'कारण सहित अस्वीकार करें';
+$string['email_admin_subject'] = 'नया आईडी अपलोड: {$a->username}';
+$string['email_admin_body'] = 'उपयोगकर्ता {$a->username} ने समीक्षा के लिए अपना आईडी अपलोड किया है।\nआप यहां अनुरोध की समीक्षा कर सकते हैं: {$a->url}';
+$string['email_approved_subject'] = 'पाठ्यक्रम नामांकन स्वीकृत';
+$string['email_approved_body'] = 'नमस्ते {$a->firstname},\n\nआपका पंजीकरण स्वीकृत हो गया है। आपको निम्नलिखित पाठ्यक्रमों में नामांकित किया गया है:\n{$a->courses}\n\nव्यवस्थापक टिप्पणियाँ: {$a->comments}\n\nअब आप लॉग इन कर सकते हैं और अपने पाठ्यक्रमों तक पहुँच सकते हैं।';
+$string['email_rejected_subject'] = 'पंजीकरण अस्वीकृत';
+$string['email_rejected_body'] = 'नमस्ते {$a->firstname},\n\nदुर्भाग्य से, आपका पंजीकरण अस्वीकार कर दिया गया है।\n\nव्यवस्थापक टिप्पणियाँ: {$a->comments}\n\nकृपया लॉग इन करें और अपने दस्तावेज़ों को फिर से अपलोड करने के लिए निर्देशों का पालन करें।';
+$string['email_course_approved_subject'] = 'पाठ्यक्रम नामांकन स्वीकृत: {$a->coursename}';
+$string['email_course_approved_body'] = 'नमस्ते {$a->firstname},\n\nपाठ्यक्रम \"{$a->coursename}\" में शामिल होने का आपका अनुरोध स्वीकार कर लिया गया है।\n\nव्यवस्थापक टिप्पणियाँ: {$a->comments}\n\nअब आप पाठ्यक्रम तक पहुँच सकते हैं।';
+$string['notapplicable'] = 'लागु नहीं';
+$string['default_approve_comment'] = 'हमारी मैन्युअल समीक्षा के बाद आपका पंजीकरण स्वीकृत कर दिया गया है।';
+$string['default_deny_comment'] = 'आपके दस्तावेज़ अपर्याप्त थे या हमारी आवश्यकताओं से मेल नहीं खाते थे।';
+$string['default_approve_course_comment'] = 'इस पाठ्यक्रम में आपका नामांकन स्वीकृत कर दिया गया है।';
+$string['default_deny_course_comment'] = 'आप इस विशिष्ट पाठ्यक्रम के लिए आवश्यक पूर्व-आवश्यकताओं या मानदंडों को पूरा नहीं करते हैं।';

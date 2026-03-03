@@ -44,10 +44,12 @@ class local_customreg_upload_form extends moodleform {
                 'new' => get_string('newmember', 'local_customreg')
             ]
         );
+        $mform->setDefault('identitytype', 'existing');
 
         // 2. Institution ID
         $mform->addElement('text', 'institutionid', get_string('institutionid', 'local_customreg'));
         $mform->setType('institutionid', PARAM_ALPHANUMEXT);
+        $mform->hideIf('institutionid', 'identitytype', 'eq', 'new');
 
         // 3. Course Selection (Searchable)
         $availableids = [];
@@ -165,7 +167,7 @@ if ($data = $mform->get_data()) {
     $update = new stdClass();
     $update->userid = $USER->id;
     $update->identitytype = $data->identitytype;
-    $update->institutionid = $data->institutionid;
+    $update->institutionid = ($data->identitytype === 'new') ? 'NA' : $data->institutionid;
     $update->courseidsjson = json_encode($selectedcourses);
     $update->documentuploaded = 1;
     $update->status = 'pending';
@@ -183,6 +185,9 @@ if ($data = $mform->get_data()) {
 
     // Log the update
     local_customreg_log($USER->id, 'uploaded', 'User completed registration form and uploaded document.');
+
+    // Notify admins
+    local_customreg_notify_admins_new_upload($USER->id);
 
     echo $OUTPUT->header();
     echo $OUTPUT->notification('Document uploaded successfully.', 'notifysuccess');
