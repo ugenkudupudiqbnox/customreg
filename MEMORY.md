@@ -23,6 +23,51 @@
 
 ---
 
+## Database Schema (Production)
+
+### Table: `local_customreg`
+- `userid` (int, unique index)
+- `identitytype` (char 50: 'new', 'existing', etc.)
+- `institutionid` (char 100)
+- `courseidsjson` (text, JSON list of courses assigned)
+- `documentuploaded` (bool)
+- `documentrequired` (bool)
+- `status` (char 50: 'pending', 'approved', 'rejected')
+- `verifiedby` (int, admin userid)
+- `timeverified` (int, timestamp)
+
+### Table: `local_customreg_logs`
+- `userid` (int)
+- `adminid` (int)
+- `action` (char 50: 'raised', 'approved', 'rejected')
+- `details` (text)
+
+---
+
+## Migration History
+
+| Version | Action |
+| :--- | :--- |
+| `2026022419` | Created `local_customreg` table |
+| `2026022432` | Created `local_customreg_logs` table |
+
+---
+
+## Core Logic & Enforcement
+
+### Enforcement Policy
+- **Global**: All students are redirected to `upload.php` if `documentrequired = 1` and `status != 'approved'`.
+- **Exemptions**: Admins, Managers, Course Creators.
+- **Auto-Enforce**: If a user record is missing during `before_http_headers`, a 'pending' record is auto-generated in `local_customreg`.
+
+### Signup Logic
+- Users who sign up with specific institutional IDs may have different `documentrequired` flags (managed in [classes/hook_handler.php](classes/hook_handler.php)).
+
+### 5-Course Limit (Admin)
+- Enforce a 5-course limit in administrative interfaces for regular admin users. (v11.5)
+
+---
+
 ## Final Architecture Goal
 
 - Stable enforcement

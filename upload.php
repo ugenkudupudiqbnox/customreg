@@ -1,5 +1,6 @@
 <?php
 require('../../config.php');
+require_once($CFG->dirroot.'/local/customreg/lib.php');
 require_login();
 require_once($CFG->libdir . '/formslib.php');
 
@@ -96,6 +97,7 @@ class local_customreg_upload_form extends moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
         
+        // 1. Course count validation
         $count = 0;
         if (!empty($data['customreg_courses'])) {
             $count = count($data['customreg_courses']);
@@ -105,6 +107,22 @@ class local_customreg_upload_form extends moodleform {
             $errors['customreg_courses'] = get_string('maxcoursesreached', 'local_customreg');
         } else if ($count == 0) {
             $errors['customreg_courses'] = get_string('atleastonecourse', 'local_customreg');
+        }
+
+        // 2. Server-side file extension validation
+        $usercontext = context_user::instance($GLOBALS['USER']->id);
+        $fs = get_file_storage();
+        $draftid = file_get_submitted_draft_itemid('govid');
+        $files_in_draft = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftid, 'itemid', false);
+        
+        if (!empty($files_in_draft)) {
+            $file = reset($files_in_draft);
+            $filename = $file->get_filename();
+            $allowed = ['.pdf', '.jpg', '.png', '.jpeg'];
+            $ext = strtolower(strrchr($filename, '.'));
+            if (!in_array($ext, $allowed)) {
+                $errors['govid'] = 'Invalid file type. Only PDF, JPG, and PNG are allowed.';
+            }
         }
         
         return $errors;
@@ -164,7 +182,6 @@ if ($data = $mform->get_data()) {
     }
 
     // Log the update
-    require_once($CFG->dirroot . '/local/customreg/lib.php');
     local_customreg_log($USER->id, 'uploaded', 'User completed registration form and uploaded document.');
 
     echo $OUTPUT->header();
@@ -183,7 +200,7 @@ if ($data = $mform->get_data()) {
 
 echo $OUTPUT->header();
 
-if ($rec && $rec->status === 'denied') {
+if ($rec && $rec->status === 'rejected') {
     echo $OUTPUT->notification(get_string('uploadagain', 'local_customreg'), 'notifyproblem');
 }
 

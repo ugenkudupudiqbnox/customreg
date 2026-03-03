@@ -21,6 +21,19 @@ function local_customreg_log($userid, $action, $details = null) {
     $log->details = $details;
     $log->timecreated = time();
     $DB->insert_record('local_customreg_logs', $log);
+
+    // Trigger standard Moodle Event for integration with site-wide reporting
+    $event = \local_customreg\event\registration_updated::create([
+        'context' => \context_system::instance(),
+        'userid' => $USER->id,
+        'relateduserid' => $userid,
+        'other' => [
+            'action' => $action,
+            'details' => $details,
+            'status' => $action // In many cases action matches the new status
+        ]
+    ]);
+    $event->trigger();
 }
 
 /**

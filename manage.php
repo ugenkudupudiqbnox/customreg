@@ -1,6 +1,7 @@
 <?php
 require('../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->dirroot.'/local/customreg/lib.php');
 require_login();
 
 admin_externalpage_setup('local_customreg_manage');
@@ -15,13 +16,15 @@ $perpage = 20;
 
 // Handle Log Retrieval (AJAX-like response)
 if ($action === 'getlogs' && $userid > 0) {
+    require_capability('local/customreg:manage', $context);
     header('Content-Type: application/json');
+    // Limit to latest 50 logs to avoid performance issues
     $logs = $DB->get_records_sql("
         SELECT l.*, u.firstname, u.lastname 
         FROM {local_customreg_logs} l 
         LEFT JOIN {user} u ON l.adminid = u.id 
         WHERE l.userid = ? 
-        ORDER BY l.timecreated DESC", [$userid]);
+        ORDER BY l.timecreated DESC", [$userid], 0, 50);
     
     $output = [];
     foreach ($logs as $log) {
@@ -42,8 +45,6 @@ if ($action === 'approve' && $userid > 0 && confirm_sesskey()) {
     $DB->set_field('local_customreg', 'status', 'approved', ['userid' => $userid]);
     $DB->set_field('local_customreg', 'timemodified', time(), ['userid' => $userid]);
     
-    require_once($CFG->dirroot . '/local/customreg/lib.php');
-    
     // Log approval
     local_customreg_log($userid, 'approved', 'Registration overall approved.');
     
@@ -52,13 +53,12 @@ if ($action === 'approve' && $userid > 0 && confirm_sesskey()) {
 
 // Handle Deny Action
 if ($action === 'deny' && $userid > 0 && confirm_sesskey()) {
-    $DB->set_field('local_customreg', 'status', 'denied', ['userid' => $userid]);
+    $DB->set_field('local_customreg', 'status', 'rejected', ['userid' => $userid]);
     $DB->set_field('local_customreg', 'documentuploaded', 0, ['userid' => $userid]);
     $DB->set_field('local_customreg', 'timemodified', time(), ['userid' => $userid]);
     
     // Log denial
-    require_once($CFG->dirroot . '/local/customreg/lib.php');
-    local_customreg_log($userid, 'denied', 'Registration request denied.');
+    local_customreg_log($userid, 'rejected', 'Registration request rejected.');
     
     // Optional: Delete existing files to save space and avoid confusion
     $fs = get_file_storage();
@@ -73,7 +73,18 @@ if ($action === 'approvecourse' && $userid > 0 && confirm_sesskey()) {
     $rec = $DB->get_record('local_customreg', ['userid' => $userid], '*', MUST_EXIST);
     $courses = json_decode($rec->courseidsjson, true) ?: [];
     
-    require_once($CFG->dirroot . '/local/customreg/lib.php');
+    // Count already approved courses
+    $approvedcount = 0;
+    foreach ($courses as $c) {
+        if ($c['status'] === 'approved') {
+            $approvedcount++;
+        }
+    }
+
+    if ($approvedcount >= 5) {
+        redirect($PAGE->url, get_string('maxcoursesreached', 'local_customreg'), 2);
+    }
+
     foreach ($courses as &$c) {
         if ($c['id'] == $courseid) {
             $c['status'] = 'approved';
@@ -92,11 +103,10 @@ if ($action === 'denycourse' && $userid > 0 && confirm_sesskey()) {
     $rec = $DB->get_record('local_customreg', ['userid' => $userid], '*', MUST_EXIST);
     $courses = json_decode($rec->courseidsjson, true) ?: [];
     
-    require_once($CFG->dirroot . '/local/customreg/lib.php');
     foreach ($courses as &$c) {
         if ($c['id'] == $courseid) {
-            $c['status'] = 'denied';
-            local_customreg_log($userid, 'denycourse', "Course ID $courseid denied.");
+            $c['status'] = 'rejected';
+            local_customreg_log($userid, 'denycourse', "Course ID $courseid rejected.");
         }
     }
     
