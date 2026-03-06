@@ -202,9 +202,9 @@ if ($action === 'approvecourse' && $userid > 0 && confirm_sesskey()) {
     if ($all_approved) {
         $DB->set_field('local_customreg', 'status', 'approved', ['userid' => $userid]);
         $DB->set_field('local_customreg', 'timemodified', time(), ['userid' => $userid]);
-        // Note: we do NOT call local_customreg_notify_user_status here to avoid double notification.
-        // The individual course notification above is sufficient, or we rely on the admin 
-        // manually clicking the global "Approve" button if they want a global email.
+        // BEYOND FIX: We set courseidsjson BEFORE redirection so logic is sound. We 
+        // will not trigger local_customreg_notify_user_status here because
+        // local_customreg_notify_course_approved was just sent in the loop above.
     }
     
     $DB->set_field('local_customreg', 'courseidsjson', json_encode($courses), ['id' => $rec->id]);
@@ -228,6 +228,25 @@ if ($action === 'denycourse' && $userid > 0 && confirm_sesskey()) {
         }
     }
     
+    // Check if ALL courses are now resolved (approved or rejected). 
+    // If so, update the global status to 'approved' if at least one is approved, 
+    // or 'rejected' if none are approved and all are rejected.
+    $any_approved = false;
+    $all_resolved = true;
+    foreach ($courses as $c) {
+        if ($c['status'] === 'approved') {
+            $any_approved = true;
+        } else if ($c['status'] === 'pending') {
+            $all_resolved = false;
+        }
+    }
+
+    if ($all_resolved) {
+        $new_global_status = $any_approved ? 'approved' : 'rejected';
+        $DB->set_field('local_customreg', 'status', $new_global_status, ['userid' => $userid]);
+        $DB->set_field('local_customreg', 'timemodified', time(), ['userid' => $userid]);
+    }
+
     $DB->set_field('local_customreg', 'courseidsjson', json_encode($courses), ['id' => $rec->id]);
     redirect($PAGE->url, get_string('userdenied', 'local_customreg'), 2);
 }
