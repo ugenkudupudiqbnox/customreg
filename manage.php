@@ -185,9 +185,26 @@ if ($action === 'approvecourse' && $userid > 0 && confirm_sesskey()) {
             local_customreg_enroll_user_into_course($userid, $courseid);
             local_customreg_log($userid, 'approvecourse', "Course ID $courseid approved and user enrolled. Comments: $comments");
             
-            // Notify user for single course
+            // Notify user for single course - only if we are not planning to send a bulk notification elsewhere
             local_customreg_notify_course_approved($userid, $courseid, $comments);
         }
+    }
+    
+    // Check if ALL courses are now approved. If so, update the global status to approved.
+    $all_approved = true;
+    foreach ($courses as $c) {
+        if ($c['status'] !== 'approved') {
+            $all_approved = false;
+            break;
+        }
+    }
+    
+    if ($all_approved) {
+        $DB->set_field('local_customreg', 'status', 'approved', ['userid' => $userid]);
+        $DB->set_field('local_customreg', 'timemodified', time(), ['userid' => $userid]);
+        // Note: we do NOT call local_customreg_notify_user_status here to avoid double notification.
+        // The individual course notification above is sufficient, or we rely on the admin 
+        // manually clicking the global "Approve" button if they want a global email.
     }
     
     $DB->set_field('local_customreg', 'courseidsjson', json_encode($courses), ['id' => $rec->id]);
