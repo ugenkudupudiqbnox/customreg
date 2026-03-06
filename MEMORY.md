@@ -30,11 +30,13 @@
 - `identitytype` (char 50: 'new', 'existing', etc.)
 - `institutionid` (char 100)
 - `courseidsjson` (text, JSON list of courses assigned)
-- `documentuploaded` (bool)
-- `documentrequired` (bool)
+- `documentuploaded` (bool/int 1)
+- `documentrequired` (bool/int 1)
 - `status` (char 50: 'pending', 'approved', 'rejected')
 - `verifiedby` (int, admin userid)
 - `timeverified` (int, timestamp)
+- `timecreated` (int, timestamp)
+- `timemodified` (int, timestamp)
 - `admin_comments` (text)
 
 ### Table: `local_customreg_logs`
@@ -42,6 +44,7 @@
 - `adminid` (int)
 - `action` (char 50: 'raised', 'approved', 'rejected')
 - `details` (text)
+- `timecreated` (int, timestamp)
 
 ---
 
@@ -54,6 +57,7 @@
 | `2026030401` | Added `admin_comments` field to `local_customreg` |
 | `2026030402` | UI Refined: Redirected Rejected users back to upload |
 | `2026030403` | v2.1.0: Default Admin Comments, 25 Languages & Email Subject Fix |
+| `2026030421` | Current Development Version (Stability improvements) |
 
 ---
 
