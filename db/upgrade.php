@@ -62,5 +62,11 @@ function xmldb_local_customreg_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026030401, 'local', 'customreg');
     }
 
+    if ($oldversion < 2026030603) {
+        // File Picker Enhancement: Updated upload.php to include return_types and maxbytes
+        // This is a UI/form improvement with no database changes required
+        upgrade_plugin_savepoint(true, 2026030603, 'local', 'customreg');
+    }
+
     return true;
 }
