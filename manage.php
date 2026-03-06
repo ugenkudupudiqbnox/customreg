@@ -436,19 +436,20 @@ require(['jquery', 'core/modal_factory', 'core/modal_events'], function($, Modal
         commentModal = modal;
         modal.setSaveButtonText('Submit Action');
 
-        $('.action-with-comment').on('click', function(e) {
+        $(document).on('click', '.action-with-comment', function(e) {
             e.preventDefault();
             var btn = $(this);
             var data = btn.data();
             
             // Set default comment based on action
             var defaultText = defaultComments[data.action] || '';
-            $('#admin-comment-input').val(defaultText);
             
             modal.show();
+            // Wait for modal to be fully shown and DOM to be ready
+            modal.getRoot().find('#admin-comment-input').val(defaultText);
 
-            modal.getRoot().on(ModalEvents.save, function() {
-                var comment = $('#admin-comment-input').val();
+            modal.getRoot().off(ModalEvents.save).on(ModalEvents.save, function() {
+                var comment = modal.getRoot().find('#admin-comment-input').val();
                 var url = new URL(window.location.href);
                 url.searchParams.set('action', data.action);
                 url.searchParams.set('userid', data.userid);
