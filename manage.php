@@ -121,14 +121,8 @@ if ($action === 'approve' && $userid > 0 && confirm_sesskey()) {
     // Log approval
     local_customreg_log($userid, 'approved', 'Registration overall approved. Comments: ' . $comments);
     
-    // Notify user
-    $rec = $DB->get_record('local_customreg', ['userid' => $userid]);
-    $courses = json_decode($rec->courseidsjson, true) ?: [];
-    $approved_ids = [];
-    foreach ($courses as $c) {
-        if ($c['status'] === 'approved') $approved_ids[] = $c['id'];
-    }
-    local_customreg_notify_user_status($userid, 'approved', $comments, $approved_ids);
+    // Notify user - only for global registration status
+    local_customreg_notify_user_status($userid, 'approved', $comments);
 
     redirect($PAGE->url, get_string('userapproved', 'local_customreg'), 2);
 }

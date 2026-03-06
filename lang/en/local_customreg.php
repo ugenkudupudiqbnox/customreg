@@ -50,8 +50,18 @@ $string['deny_with_reason'] = 'Reject with Reason';
 $string['email_admin_subject'] = 'New ID Upload: {$a->username}';
 $string['email_admin_body'] = 'User {$a->username} has uploaded their ID for review.
 You can review the request here: {$a->url}';
-$string['email_approved_subject'] = 'Course Enrollment Approved';
+$string['email_approved_subject'] = 'Account Approved';
 $string['email_approved_body'] = 'Hello {$a->firstname},
+
+Your registration has been approved following our manual review. 
+You can now access your account and any enrolled courses.
+
+Admin Comments: {$a->comments}
+
+You can now log in here: {$a->sitelink}';
+
+$string['email_bulk_approved_subject'] = 'Course Enrollment Approved';
+$string['email_bulk_approved_body'] = 'Hello {$a->firstname},
 
 Your registration has been approved. You have been enrolled in the following courses:
 {$a->courses}
@@ -59,6 +69,7 @@ Your registration has been approved. You have been enrolled in the following cou
 Admin Comments: {$a->comments}
 
 You can now log in and access your courses: {$a->sitelink}';
+
 $string['email_rejected_subject'] = 'Registration Rejected';
 $string['email_rejected_body'] = 'Hello {$a->firstname},
 
@@ -67,14 +78,16 @@ Unfortunately, your registration has been rejected.
 Admin Comments: {$a->comments}
 
 Please log in and follow the instructions to re-upload your documentation: {$a->uploadurl}';
-$string['email_course_approved_subject'] = 'Course Enrollment Approved: {$a->coursename}';
+$string['email_course_approved_subject'] = 'Individual Course Approved: {$a->coursename}';
 $string['email_course_approved_body'] = 'Hello {$a->firstname},
 
-Your request to join the course "{$a->coursename}" has been approved.
+Your registration for the following course has been approved:
+
+- {$a->coursename} ({$a->courseurl})
 
 Admin Comments: {$a->comments}
 
-You can now access the course here: {$a->courseurl}';
+You can now log in and access your courses: {$a->sitelink}';
 $string['notapplicable'] = 'N/A';
 $string['default_approve_comment'] = 'Your registration has been approved following our manual review.';
 $string['default_deny_comment'] = 'Your documentation was insufficient or did not match our requirements.';

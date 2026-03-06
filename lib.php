@@ -68,7 +68,9 @@ function local_customreg_notify_user_status($userid, $status, $comments = '', $c
 
     if ($status === 'approved') {
         $a->courses = '';
+        $is_bulk = false;
         if (!empty($courses)) {
+            $is_bulk = true;
             $coursenames = [];
             foreach ($courses as $cid) {
                 $c = $DB->get_record('course', ['id' => $cid]);
@@ -79,8 +81,14 @@ function local_customreg_notify_user_status($userid, $status, $comments = '', $c
             }
             $a->courses = implode("\n", $coursenames);
         }
-        $subject = get_string('email_approved_subject', 'local_customreg', $a);
-        $body = get_string('email_approved_body', 'local_customreg', $a);
+        
+        if ($is_bulk) {
+            $subject = get_string('email_bulk_approved_subject', 'local_customreg', $a);
+            $body = get_string('email_bulk_approved_body', 'local_customreg', $a);
+        } else {
+            $subject = get_string('email_approved_subject', 'local_customreg', $a);
+            $body = get_string('email_approved_body', 'local_customreg', $a);
+        }
     } else {
         $a->uploadurl = new moodle_url('/local/customreg/upload.php');
         $subject = get_string('email_rejected_subject', 'local_customreg', $a);

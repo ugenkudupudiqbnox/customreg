@@ -47,15 +47,63 @@ $string['selectacourse'] = 'Выберите курс';
 $string['admin_comments'] = 'Комментарии администратора';
 $string['deny_with_reason'] = 'Отклонить с указанием причины';
 $string['email_admin_subject'] = 'Загружено новое удостоверение: {$a->username}';
-$string['email_admin_body'] = 'Пользователь {$a->username} загрузил свое удостоверение для проверки.\nВы можете просмотреть запрос здесь: {$a->url}';
+$string['email_admin_body'] = 'Пользователь {$a->username} загрузил свое удостоверение для проверки.
 $string['email_approved_subject'] = 'Зачисление на курс одобрено';
-$string['email_approved_body'] = 'Здравствуйте, {$a->firstname}!\n\nВаша регистрация одобрена. Вы были зачислены на следующие курсы:\n{$a->courses}\n\nКомментарии администратора: {$a->comments}\n\nТеперь вы можете войти в систему и получить доступ к своим курсам.';
+$string['email_approved_body'] = 'Здравствуйте, {$a->firstname}!
+
+
+
 $string['email_rejected_subject'] = 'Регистрация отклонена';
-$string['email_rejected_body'] = 'Здравствуйте, {$a->firstname}!\n\nК сожалению, ваша регистрация была отклонена.\n\nКомментарии администратора: {$a->comments}\n\nПожалуйста, войдите в систему и следуйте инструкциям для повторной загрузки документов.';
+$string['email_rejected_body'] = 'Здравствуйте, {$a->firstname}!
+
+
+
 $string['email_course_approved_subject'] = 'Зачисление на курс одобрено: {$a->coursename}';
-$string['email_course_approved_body'] = 'Здравствуйте, {$a->firstname}!\n\nЗапрос на ваше участие в курсе «{$a->coursename}» был одобрен.\n\nКомментарии администратора: {$a->comments}\n\nТеперь вы можете получить доступ к курсу.';
+$string['email_course_approved_body'] = 'Здравствуйте, {$a->firstname}!
+
+
+
 $string['notapplicable'] = 'Н/Д';
 $string['default_approve_comment'] = 'Ваша регистрация была одобрена после нашей проверки вручную.';
 $string['default_deny_comment'] = 'Ваши документы были недостаточными или не соответствовали нашим требованиям.';
 $string['default_approve_course_comment'] = 'Ваше зачисление на этот курс одобрено.';
 $string['default_deny_course_comment'] = 'Вы не соответствуете предварительным условиям или предъявляемым критериям для данного конкретного курса.';
+
+$string['email_admin_body'] = 'Пользователь {$a->username} загрузил свое удостоверение для проверки.
+$string['email_approved_body'] = 'Здравствуйте, {$a->firstname}!
+
+
+
+$string['email_rejected_body'] = 'Здравствуйте, {$a->firstname}!
+
+
+
+$string['email_course_approved_body'] = 'Здравствуйте, {$a->firstname}!
+
+
+
+
+$string['email_admin_body'] = 'Пользователь {$a->username} загрузил свое удостоверение для проверки.
+Вы можете просмотреть запрос здесь: {$a->url}';
+$string['email_approved_body'] = 'Здравствуйте, {$a->firstname}!
+
+Ваша регистрация одобрена. Вы были зачислены на следующие курсы:
+{$a->courses}
+
+Комментарии администратора: {$a->comments}
+
+Теперь вы можете войти в систему и получить доступ к своим курсам.: {$a->sitelink}';
+$string['email_rejected_body'] = 'Здравствуйте, {$a->firstname}!
+
+К сожалению, ваша регистрация была отклонена.
+
+Комментарии администратора: {$a->comments}
+
+Пожалуйста, войдите в систему и следуйте инструкциям для повторной загрузки документов.: {$a->uploadurl}';
+$string['email_course_approved_body'] = 'Здравствуйте, {$a->firstname}!
+
+Запрос на ваше участие в курсе «{$a->coursename}» был одобрен.
+
+Комментарии администратора: {$a->comments}
+
+Теперь вы можете получить доступ к курсу.: {$a->courseurl}';

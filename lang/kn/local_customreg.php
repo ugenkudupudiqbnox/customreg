@@ -47,15 +47,63 @@ $string['selectacourse'] = 'ಕೋರ್ಸ್ ಆಯ್ಕೆಮಾಡಿ';
 $string['admin_comments'] = 'ನಿರ್ವಾಹಕರ ಕಾಮೆಂಟ್‌ಗಳು';
 $string['deny_with_reason'] = 'ಕಾರಣದೊಂದಿಗೆ ತಿರಸ್ಕರಿಸಿ';
 $string['email_admin_subject'] = 'ಹೊಸ ಐಡಿ ಅಪ್‌ಲೋಡ್: {$a->username}';
-$string['email_admin_body'] = 'ಬಳಕೆದಾರ {$a->username} ಪರಿಶೀಲನೆಗಾಗಿ ತಮ್ಮ ಐಡಿಯನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ್ದಾರೆ.\nನೀವು ವಿನಂತಿಯನ್ನು ಇಲ್ಲಿ ಪರಿಶೀಲಿಸಬಹುದು: {$a->url}';
+$string['email_admin_body'] = 'ಬಳಕೆದಾರ {$a->username} ಪರಿಶೀಲನೆಗಾಗಿ ತಮ್ಮ ಐಡಿಯನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ್ದಾರೆ.
 $string['email_approved_subject'] = 'ಕೋರ್ಸ್ ದಾಖಲಾತಿ ಅನುಮೋದಿಸಲಾಗಿದೆ';
-$string['email_approved_body'] = 'ಹಲೋ {$a->firstname},\n\nನಿಮ್ಮ ನೋಂದಣಿಯನ್ನು ಅನುಮೋದಿಸಲಾಗಿದೆ. ಈ ಕೆಳಗಿನ ಕೋರ್ಸ್‌ಗಳಿಗೆ ನೀವು ದಾಖಲಾಗಿದ್ದೀರಿ:\n{$a->courses}\n\nನಿರ್ವಾಹಕರ ಕಾಮೆಂಟ್‌ಗಳು: {$a->comments}\n\nನೀವು ಈಗ ಲಾಗ್ ಇನ್ ಮಾಡಬಹುದು ಮತ್ತು ನಿಮ್ಮ ಕೋರ್ಸ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಬಹುದು.';
+$string['email_approved_body'] = 'ಹಲೋ {$a->firstname},
+
+
+
 $string['email_rejected_subject'] = 'ನೋಂದಣಿ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ';
-$string['email_rejected_body'] = 'ಹಲೋ {$a->firstname},\n\nದುರದೃಷ್ಟವಶಾತ್, ನಿಮ್ಮ ನೋಂದಣಿಯನ್ನು ತಿರಸ್ಕರಿಸಲಾಗಿದೆ.\n\nನಿರ್ವಾಹಕರ ಕಾಮೆಂಟ್‌ಗಳು: {$a->comments}\n\nದಯವಿಟ್ಟು ಲಾಗ್ ಇನ್ ಮಾಡಿ ಮತ್ತು ನಿಮ್ಮ ದಾಖಲಾತಿಗಳನ್ನು ಮರು-ಅಪ್‌ಲೋಡ್ ಮಾಡಲು ಸೂಚನೆಗಳನ್ನು ಅನುಸರಿಸಿ.';
+$string['email_rejected_body'] = 'ಹಲೋ {$a->firstname},
+
+
+
 $string['email_course_approved_subject'] = 'ಕೋರ್ಸ್ ದಾಖಲಾತಿ ಅನುಮೋದಿಸಲಾಗಿದೆ: {$a->coursename}';
-$string['email_course_approved_body'] = 'ಹಲೋ {$a->firstname},\n\n\"{$a->coursename}\" ಕೋರ್ಸ್‌ಗೆ ಸೇರುವ ನಿಮ್ಮ ವಿನಂತಿಯನ್ನು ಅನುಮೋದಿಸಲಾಗಿದೆ.\n\nನಿರ್ವಾಹಕರ ಕಾಮೆಂಟ್‌ಗಳು: {$a->comments}\n\nನೀವು ಈಗ ಕೋರ್ಸ್ ಅನ್ನು ಪ್ರವೇಶಿಸಬಹುದು.';
+$string['email_course_approved_body'] = 'ಹಲೋ {$a->firstname},
+
+
+
 $string['notapplicable'] = 'ಅನ್ವಯಿಸುವುದಿಲ್ಲ';
 $string['default_approve_comment'] = 'ನಮ್ಮ ಹಸ್ತಚಾಲಿತ ಪರಿಶೀಲನೆಯ ನಂತರ ನಿಮ್ಮ ನೋಂದಣಿಯನ್ನು ಅನುಮೋದಿಸಲಾಗಿದೆ.';
 $string['default_deny_comment'] = 'ನಿಮ್ಮ ದಾಖಲೆಗಳು ಸಾಕಷ್ಟಿರಲಿಲ್ಲ ಅಥವಾ ನಮ್ಮ ಅವಶ್ಯಕತೆಗಳಿಗೆ ಹೊಂದಿಕೆಯಾಗಲಿಲ್ಲ.';
 $string['default_approve_course_comment'] = 'ಈ ಕೋರ್ಸ್‌ನಲ್ಲಿ ನಿಮ್ಮ ದಾಖಲಾತಿಯನ್ನು ಅನುಮೋದಿಸಲಾಗಿದೆ.';
 $string['default_deny_course_comment'] = 'ಈ ನಿರ್ದಿష్ట ಕೋರ್ಸ್‌ಗೆ ಅಗತ್ಯವಿರುವ ಪೂರ್ವಾಪೇಕ್ಷಿತಗಳು ಅಥವಾ ಅಗತ್ಯ ಮಾನದಂಡಗಳನ್ನು ನೀವು ಪೂರೈಸುವುದಿಲ್ಲ.';
+
+$string['email_admin_body'] = 'ಬಳಕೆದಾರ {$a->username} ಪರಿಶೀಲನೆಗಾಗಿ ತಮ್ಮ ಐಡಿಯನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ್ದಾರೆ.
+$string['email_approved_body'] = 'ಹಲೋ {$a->firstname},
+
+
+
+$string['email_rejected_body'] = 'ಹಲೋ {$a->firstname},
+
+
+
+$string['email_course_approved_body'] = 'ಹಲೋ {$a->firstname},
+
+
+
+
+$string['email_admin_body'] = 'ಬಳಕೆದಾರ {$a->username} ಪರಿಶೀಲನೆಗಾಗಿ ತಮ್ಮ ಐಡಿಯನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ್ದಾರೆ.
+ನೀವು ವಿನಂತಿಯನ್ನು ಇಲ್ಲಿ ಪರಿಶೀಲಿಸಬಹುದು: {$a->url}';
+$string['email_approved_body'] = 'ಹಲೋ {$a->firstname},
+
+ನಿಮ್ಮ ನೋಂದಣಿಯನ್ನು ಅನುಮೋದಿಸಲಾಗಿದೆ. ಈ ಕೆಳಗಿನ ಕೋರ್ಸ್‌ಗಳಿಗೆ ನೀವು ದಾಖಲಾಗಿದ್ದೀರಿ:
+{$a->courses}
+
+ನಿರ್ವಾಹಕರ ಕಾಮೆಂಟ್‌ಗಳು: {$a->comments}
+
+ನೀವು ಈಗ ಲಾಗ್ ಇನ್ ಮಾಡಬಹುದು ಮತ್ತು ನಿಮ್ಮ ಕೋರ್ಸ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಬಹುದು.: {$a->sitelink}';
+$string['email_rejected_body'] = 'ಹಲೋ {$a->firstname},
+
+ದುರದೃಷ್ಟವಶಾತ್, ನಿಮ್ಮ ನೋಂದಣಿಯನ್ನು ತಿರಸ್ಕರಿಸಲಾಗಿದೆ.
+
+ನಿರ್ವಾಹಕರ ಕಾಮೆಂಟ್‌ಗಳು: {$a->comments}
+
+ದಯವಿಟ್ಟು ಲಾಗ್ ಇನ್ ಮಾಡಿ ಮತ್ತು ನಿಮ್ಮ ದಾಖಲಾತಿಗಳನ್ನು ಮರು-ಅಪ್‌ಲೋಡ್ ಮಾಡಲು ಸೂಚನೆಗಳನ್ನು ಅನುಸರಿಸಿ.: {$a->uploadurl}';
+$string['email_course_approved_body'] = 'ಹಲೋ {$a->firstname},
+
+\"{$a->coursename}\" ಕೋರ್ಸ್‌ಗೆ ಸೇರುವ ನಿಮ್ಮ ವಿನಂತಿಯನ್ನು ಅನುಮೋದಿಸಲಾಗಿದೆ.
+
+ನಿರ್ವಾಹಕರ ಕಾಮೆಂಟ್‌ಗಳು: {$a->comments}
+
+ನೀವು ಈಗ ಕೋರ್ಸ್ ಅನ್ನು ಪ್ರವೇಶಿಸಬಹುದು.: {$a->courseurl}';

@@ -47,15 +47,63 @@ $string['selectacourse'] = 'ଏକ କୋର୍ସ ଚୟନ କରନ୍ତୁ'
 $string['admin_comments'] = 'ପ୍ରଶାସକ ମନ୍ତବ୍ୟ';
 $string['deny_with_reason'] = 'କାରଣ ସହିତ ପ୍ରତ୍ୟାଖ୍ୟାନ କରନ୍ତୁ';
 $string['email_admin_subject'] = 'ନୂତନ ଆଇଡି ଅପଲୋଡ୍: {$a->username}';
-$string['email_admin_body'] = 'ଉପଭୋକ୍ତା {$a->username} ସମୀକ୍ଷା ପାଇଁ ସେମାନଙ୍କର ଆଇଡି ଅପଲୋଡ୍ କରିଛନ୍ତି।\nଆପଣ ଏଠାରେ ଅନୁରୋଧ ସମୀକ୍ଷା କରିପାରିବେ: {$a->url}';
+$string['email_admin_body'] = 'ଉପଭୋକ୍ତା {$a->username} ସମୀକ୍ଷା ପାଇଁ ସେମାନଙ୍କର ଆଇଡି ଅପଲୋଡ୍ କରିଛନ୍ତି।
 $string['email_approved_subject'] = 'ପାଠ୍ୟକ୍ରମ ନାମଲେଖା ଅନୁମୋଦିତ';
-$string['email_approved_body'] = 'ନମସ୍କାର {$a->firstname},\n\nଆପଣଙ୍କର ପଞ୍ଜିକରଣ ଅନୁମୋଦିତ ହୋଇଛି | ଆପଣ ନିମ୍ନଲିଖିତ ପାଠ୍ୟକ୍ରମରେ ନାମ ଲେଖାଇଛନ୍ତି:\n{$a->courses}\n\nପ୍ରଶାସକ ମନ୍ତବ୍ୟ: {$a->comments}\n\nଆପଣ ବର୍ତ୍ତମାନ ଲଗ୍ ଇନ୍ କରିପାରିବେ ଏବଂ ଆପଣଙ୍କର ପାଠ୍ୟକ୍ରમକୁ ବ୍ୟବହାର କରିପାରିବେ |';
+$string['email_approved_body'] = 'ନମସ୍କାର {$a->firstname},
+
+
+
 $string['email_rejected_subject'] = 'ପଞ୍ଜିକରଣ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଇଛି';
-$string['email_rejected_body'] = 'ନମସ୍କାର {$a->firstname},\n\nଦୁର୍ଭାଗ୍ୟବଶତ,, ଆପଣଙ୍କର ପଞ୍ଜିକରଣ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଇଛି | \n\nପ୍ରଶାସକ ମନ୍ତବ୍ୟ: {$a->comments}\n\nଦୟାକରି ଲଗ୍ ଇନ୍ କରନ୍ତୁ ଏବଂ ଆପଣଙ୍କର ଦଲିଲଗୁଡ଼ିକୁ ପୁନର୍ବାର ଅପଲୋଡ୍ କରିବାକୁ ନିର୍ଦ୍ଦେଶାବଳୀ ଅନୁସରଣ କରନ୍ତୁ |';
+$string['email_rejected_body'] = 'ନମସ୍କାର {$a->firstname},
+
+
+
 $string['email_course_approved_subject'] = 'ପାଠ୍ୟକ୍ରମ ନାମଲେଖା ଅନୁମୋଦିତ: {$a->coursename}';
-$string['email_course_approved_body'] = 'ନମସ୍କାର {$a->firstname},\n\n\"{$a->coursename}\" ପାଠ୍ୟକ୍ରମରେ ଯୋଗଦେବା ପାଇଁ ଆପଣଙ୍କର ଅନୁରୋଧ ଅନୁମୋଦିତ ହୋଇଛି | \n\nପ୍ରଶାସକ ମନ୍ତବ୍ୟ: {$a->comments}\n\nଆପଣ ବର୍ତ୍ତମାନ ପାଠ୍ୟକ୍ରମଟିକୁ ବ୍ୟବహାର କରିପାରିବେ |';
+$string['email_course_approved_body'] = 'ନମସ୍କାର {$a->firstname},
+
+
+
 $string['notapplicable'] = 'ଲାଗୁ ନାହିଁ';
 $string['default_approve_comment'] = 'ଆମର ମାନୁଆଲ୍ ସମୀକ୍ଷା ପରେ ଆପଣଙ୍କର ପଞ୍ଜିକରଣ ଅନୁମୋଦିତ ହୋଇଛି |';
 $string['default_deny_comment'] = 'ଆପଣଙ୍କର ଦଲିଲଗୁଡ଼ିକ ପର୍ଯ୍ୟାପ୍ତ ନଥିଲା କିମ୍ବା ଆମର ଆବଶ୍ୟକତା ସହିତ ମେଳ ଖାଉ ନଥିଲା |';
 $string['default_approve_course_comment'] = 'ଏହି ପାଠ୍ୟକ୍ରମରେ ଆପଣଙ୍କର ନାମଲେଖା ଅନୁମୋଦିତ ହୋଇଛି |';
 $string['default_deny_course_comment'] = 'ଆପଣ ଏହି ନିର୍ଦ୍ଦିଷ୍ଟ ପାଠ୍ୟକ୍ରମ ପାଇଁ ଆବଶ୍ୟକ ସର୍ତ୍ତ କିମ୍ବା ମାନଦଣ୍ଡ ପୂରଣ କରୁନାହାଁନ୍ତି |';
+
+$string['email_admin_body'] = 'ଉପଭୋକ୍ତା {$a->username} ସମୀକ୍ଷା ପାଇଁ ସେମାନଙ୍କର ଆଇଡି ଅପଲୋଡ୍ କରିଛନ୍ତି।
+$string['email_approved_body'] = 'ନମସ୍କାର {$a->firstname},
+
+
+
+$string['email_rejected_body'] = 'ନମସ୍କାର {$a->firstname},
+
+
+
+$string['email_course_approved_body'] = 'ନମସ୍କାର {$a->firstname},
+
+
+
+
+$string['email_admin_body'] = 'ଉପଭୋକ୍ତା {$a->username} ସମୀକ୍ଷା ପାଇଁ ସେମାନଙ୍କର ଆଇଡି ଅପଲୋଡ୍ କରିଛନ୍ତି।
+ଆପଣ ଏଠାରେ ଅନୁରୋଧ ସମୀକ୍ଷା କରିପାରିବେ: {$a->url}';
+$string['email_approved_body'] = 'ନମସ୍କାର {$a->firstname},
+
+ଆପଣଙ୍କର ପଞ୍ଜିକରଣ ଅନୁମୋଦିତ ହୋଇଛି | ଆପଣ ନିମ୍ନଲିଖିତ ପାଠ୍ୟକ୍ରମରେ ନାମ ଲେଖାଇଛନ୍ତି:
+{$a->courses}
+
+ପ୍ରଶାସକ ମନ୍ତବ୍ୟ: {$a->comments}
+
+ଆପଣ ବର୍ତ୍ତମାନ ଲଗ୍ ଇନ୍ କରିପାରିବେ ଏବଂ ଆପଣଙ୍କର ପାଠ୍ୟକ୍ରમକୁ ବ୍ୟବହାର କରିପାରିବେ |: {$a->sitelink}';
+$string['email_rejected_body'] = 'ନମସ୍କାର {$a->firstname},
+
+ଦୁର୍ଭାଗ୍ୟବଶତ,, ଆପଣଙ୍କର ପଞ୍ଜିକରଣ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଇଛି | 
+
+ପ୍ରଶାସକ ମନ୍ତବ୍ୟ: {$a->comments}
+
+ଦୟାକରି ଲଗ୍ ଇନ୍ କରନ୍ତୁ ଏବଂ ଆପଣଙ୍କର ଦଲିଲଗୁଡ଼ିକୁ ପୁନର୍ବାର ଅପଲୋଡ୍ କରିବାକୁ ନିର୍ଦ୍ଦେଶାବଳୀ ଅନୁସରଣ କରନ୍ତୁ |: {$a->uploadurl}';
+$string['email_course_approved_body'] = 'ନମସ୍କାର {$a->firstname},
+
+\"{$a->coursename}\" ପାଠ୍ୟକ୍ରମରେ ଯୋଗଦେବା ପାଇଁ ଆପଣଙ୍କର ଅନୁରୋଧ ଅନୁମୋଦିତ ହୋଇଛି | 
+
+ପ୍ରଶାସକ ମନ୍ତବ୍ୟ: {$a->comments}
+
+ଆପଣ ବର୍ତ୍ତମାନ ପାଠ୍ୟକ୍ରମଟିକୁ ବ୍ୟବహାର କରିପାରିବେ |: {$a->courseurl}';

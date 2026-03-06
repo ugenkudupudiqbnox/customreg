@@ -47,15 +47,63 @@ $string['selectacourse'] = 'コースを選択';
 $string['admin_comments'] = '管理者コメント';
 $string['deny_with_reason'] = '理由を添えて拒否';
 $string['email_admin_subject'] = '新しいIDのアップロード: {$a->username}';
-$string['email_admin_body'] = 'ユーザー {$a->username} が確認のためにIDをアップロードしました。\nこちらでリクエストを確認できます: {$a->url}';
+$string['email_admin_body'] = 'ユーザー {$a->username} が確認のためにIDをアップロードしました。
 $string['email_approved_subject'] = 'コースへの登録が承認されました';
-$string['email_approved_body'] = '{$a->firstname} さん、こんにちは。\n\n登録が承認されました。以下のコースに登録されました：\n{$a->courses}\n\n管理者コメント: {$a->comments}\n\nログインしてコースにアクセスできるようになりました。';
+$string['email_approved_body'] = '{$a->firstname} さん、こんにちは。
+
+
+
 $string['email_rejected_subject'] = '登録が拒否されました';
-$string['email_rejected_body'] = '{$a->firstname} さん、こんにちは。\n\n残念ながら、登録は拒否されました。\n\n管理者コメント: {$a->comments}\n\nログインして、指示に従って書類を再アップロードしてください。';
+$string['email_rejected_body'] = '{$a->firstname} さん、こんにちは。
+
+
+
 $string['email_course_approved_subject'] = 'コースへの登録が承認されました: {$a->coursename}';
-$string['email_course_approved_body'] = '{$a->firstname} さん、こんにちは。\n\nコース「{$a->coursename}」への参加リクエストが承認されました。\n\n管理者コメント: {$a->comments}\n\nコースにアクセスできるようになりました。';
+$string['email_course_approved_body'] = '{$a->firstname} さん、こんにちは。
+
+
+
 $string['notapplicable'] = '該当なし';
 $string['default_approve_comment'] = '手動による確認の結果、登録が承認されました。';
 $string['default_deny_comment'] = '書類が不十分であるか、要件を満たしていませんでした。';
 $string['default_approve_course_comment'] = 'このコースへの登録が承認されました。';
 $string['default_deny_course_comment'] = 'この特定のコースの前提条件または必要な基準を満たしていません。';
+
+$string['email_admin_body'] = 'ユーザー {$a->username} が確認のためにIDをアップロードしました。
+$string['email_approved_body'] = '{$a->firstname} さん、こんにちは。
+
+
+
+$string['email_rejected_body'] = '{$a->firstname} さん、こんにちは。
+
+
+
+$string['email_course_approved_body'] = '{$a->firstname} さん、こんにちは。
+
+
+
+
+$string['email_admin_body'] = 'ユーザー {$a->username} が確認のためにIDをアップロードしました。
+こちらでリクエストを確認できます: {$a->url}';
+$string['email_approved_body'] = '{$a->firstname} さん、こんにちは。
+
+登録が承認されました。以下のコースに登録されました：
+{$a->courses}
+
+管理者コメント: {$a->comments}
+
+ログインしてコースにアクセスできるようになりました。: {$a->sitelink}';
+$string['email_rejected_body'] = '{$a->firstname} さん、こんにちは。
+
+残念ながら、登録は拒否されました。
+
+管理者コメント: {$a->comments}
+
+ログインして、指示に従って書類を再アップロードしてください。: {$a->uploadurl}';
+$string['email_course_approved_body'] = '{$a->firstname} さん、こんにちは。
+
+コース「{$a->coursename}」への参加リクエストが承認されました。
+
+管理者コメント: {$a->comments}
+
+コースにアクセスできるようになりました。: {$a->courseurl}';

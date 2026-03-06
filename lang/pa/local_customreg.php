@@ -47,15 +47,63 @@ $string['selectacourse'] = 'ਕੋਰਸ ਚੁਣੋ';
 $string['admin_comments'] = 'ਐਡਮਿਨ ਟਿੱਪਣੀਆਂ';
 $string['deny_with_reason'] = 'ਕਾਰਨ ਸਹਿਤ ਅਸਵੀਕਾਰ ਕਰੋ';
 $string['email_admin_subject'] = 'ਨਵਾਂ ਆਈਡੀ ਅਪਲੋਡ: {$a->username}';
-$string['email_admin_body'] = 'ਵਰਤੋਂਕਾਰ {$a->username} ਨੇ ਸਮੀਖਿਆ ਲਈ ਆਪਣੀ ਆਈਡੀ ਅਪਲੋਡ ਕੀਤੀ ਹੈ।\nਤੁਸੀਂ ਇੱਥੇ ਬੇਨਤੀ ਦੀ ਸਮੀਖਿਆ ਕਰ ਸਕਦੇ ਹੋ: {$a->url}';
+$string['email_admin_body'] = 'ਵਰਤੋਂਕਾਰ {$a->username} ਨੇ ਸਮੀਖਿਆ ਲਈ ਆਪਣੀ ਆਈਡੀ ਅਪਲੋਡ ਕੀਤੀ ਹੈ।
 $string['email_approved_subject'] = 'ਕੋਰਸ ਦਾਖਲਾ ਮਨਜ਼ੂਰ';
-$string['email_approved_body'] = 'ਹੈਲੋ {$a->firstname},\n\nਤੁਹਾਡੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਮਨਜ਼ੂਰ ਹੋ ਗਈ ਹੈ। ਤੁਹਾਨੂੰ ਹੇਠਾਂ ਦਿੱਤੇ ਕੋਰਸਾਂ ਵਿੱਚ ਦਾਖਲ ਕੀਤਾ ਗਿਆ ਹੈ:\n{$a->courses}\n\nਐਡਮਿਨ ਟਿੱਪਣੀਆਂ: {$a->comments}\n\nਤੁਸੀਂ ਹੁਣ ਲੌਗ ਇਨ ਕਰ ਸਕਦੇ ਹੋ ਅਤੇ ਆਪਣੇ ਕੋਰਸਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੇ ਹੋ।';
+$string['email_approved_body'] = 'ਹੈਲੋ {$a->firstname},
+
+
+
 $string['email_rejected_subject'] = 'ਰਜਿਸਟਰੇਸ਼ਨ ਅਸਵੀਕਾਰ ਕੀਤੀ ਗਈ';
-$string['email_rejected_body'] = 'ਹੈਲੋ {$a->firstname},\n\nਦੁਬਾਗਵਸ਼, ਤੁਹਾਡੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਅਸਵੀਕਾਰ ਕਰ ਦਿੱਤੀ ਗਈ ਹੈ।\n\nਐਡਮਿਨ ਟਿੱਪਣੀਆਂ: {$a->comments}\n\nਕਿਰਪਾ ਕਰਕੇ ਲੌਗ ਇਨ ਕਰੋ ਅਤੇ ਆਪਣੇ ਦਸਤਾਵੇਜ਼ਾਂ ਨੂੰ ਦੁਬਾਰਾ ਅਪਲੋਡ ਕਰਨ ਲਈ ਨਿਰਦੇਸ਼ਾਂ ਦੀ ਪਾਲਣਾ ਕਰੋ।';
+$string['email_rejected_body'] = 'ਹੈਲੋ {$a->firstname},
+
+
+
 $string['email_course_approved_subject'] = 'ਕੋਰਸ ਦਾਖਲਾ ਮਨਜ਼ੂਰ: {$a->coursename}';
-$string['email_course_approved_body'] = 'ਹੈਲੋ {$a->firstname},\n\nਕੋਰਸ \"{$a->coursename}\" ਵਿੱਚ ਸ਼ਾਮਲ ਹੋਣ ਦੀ ਤੁਹਾਡੀ ਬੇਨਤੀ ਮਨਜ਼ੂਰ ਹੋ ਗਈ ਹੈ।\n\nਐਡਮਿਨ ਟਿੱਪਣੀਆਂ: {$a->comments}\n\nਤੁਸੀਂ ਹੁਣ ਕੋਰਸ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੇ ਹੋ।';
+$string['email_course_approved_body'] = 'ਹੈਲੋ {$a->firstname},
+
+
+
 $string['notapplicable'] = 'ਲਾਗੂ ਨਹੀਂ';
 $string['default_approve_comment'] = 'ਸਾਡੀ ਮੈਨੂਅਲ ਸਮੀਖਿਆ ਤੋਂ ਬਾਅਦ ਤੁਹਾਡੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਮਨਜ਼ੂਰ ਕਰ ਦਿੱਤੀ ਗਈ ਹੈ।';
 $string['default_deny_comment'] = 'ਤੁਹਾਡੇ ਦਸਤਾਵੇਜ਼ ਨਾਕਾਫ਼ੀ ਸਨ ਜਾਂ ਸਾਡੀਆਂ ਲੋੜਾਂ ਨਾਲ ਮੇਲ ਨਹੀਂ ਖਾਂਦੇ ਸਨ।';
 $string['default_approve_course_comment'] = 'ਇਸ ਕੋਰਸ ਵਿੱਚ ਤੁਹਾਡਾ ਦਾਖਲਾ ਮਨਜ਼ੂਰ ਕਰ ਦਿੱਤਾ ਗਿਆ ਹੈ।';
 $string['default_deny_course_comment'] = 'ਤੁਸੀਂ ਇਸ ਖਾਸ ਕੋਰਸ ਲਈ ਲੋੜੀਂਦੀਆਂ ਸ਼ਰਤਾਂ ਜਾਂ ਮਾਪਦੰਡਾਂ ਨੂੰ ਪੂਰਾ ਨਹੀਂ ਕਰਦੇ ਹੋ।';
+
+$string['email_admin_body'] = 'ਵਰਤੋਂਕਾਰ {$a->username} ਨੇ ਸਮੀਖਿਆ ਲਈ ਆਪਣੀ ਆਈਡੀ ਅਪਲੋਡ ਕੀਤੀ ਹੈ।
+$string['email_approved_body'] = 'ਹੈਲੋ {$a->firstname},
+
+
+
+$string['email_rejected_body'] = 'ਹੈਲੋ {$a->firstname},
+
+
+
+$string['email_course_approved_body'] = 'ਹੈਲੋ {$a->firstname},
+
+
+
+
+$string['email_admin_body'] = 'ਵਰਤੋਂਕਾਰ {$a->username} ਨੇ ਸਮੀਖਿਆ ਲਈ ਆਪਣੀ ਆਈਡੀ ਅਪਲੋਡ ਕੀਤੀ ਹੈ।
+ਤੁਸੀਂ ਇੱਥੇ ਬੇਨਤੀ ਦੀ ਸਮੀਖਿਆ ਕਰ ਸਕਦੇ ਹੋ: {$a->url}';
+$string['email_approved_body'] = 'ਹੈਲੋ {$a->firstname},
+
+ਤੁਹਾਡੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਮਨਜ਼ੂਰ ਹੋ ਗਈ ਹੈ। ਤੁਹਾਨੂੰ ਹੇਠਾਂ ਦਿੱਤੇ ਕੋਰਸਾਂ ਵਿੱਚ ਦਾਖਲ ਕੀਤਾ ਗਿਆ ਹੈ:
+{$a->courses}
+
+ਐਡਮਿਨ ਟਿੱਪਣੀਆਂ: {$a->comments}
+
+ਤੁਸੀਂ ਹੁਣ ਲੌਗ ਇਨ ਕਰ ਸਕਦੇ ਹੋ ਅਤੇ ਆਪਣੇ ਕੋਰਸਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੇ ਹੋ।: {$a->sitelink}';
+$string['email_rejected_body'] = 'ਹੈਲੋ {$a->firstname},
+
+ਦੁਬਾਗਵਸ਼, ਤੁਹਾਡੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਅਸਵੀਕਾਰ ਕਰ ਦਿੱਤੀ ਗਈ ਹੈ।
+
+ਐਡਮਿਨ ਟਿੱਪਣੀਆਂ: {$a->comments}
+
+ਕਿਰਪਾ ਕਰਕੇ ਲੌਗ ਇਨ ਕਰੋ ਅਤੇ ਆਪਣੇ ਦਸਤਾਵੇਜ਼ਾਂ ਨੂੰ ਦੁਬਾਰਾ ਅਪਲੋਡ ਕਰਨ ਲਈ ਨਿਰਦੇਸ਼ਾਂ ਦੀ ਪਾਲਣਾ ਕਰੋ।: {$a->uploadurl}';
+$string['email_course_approved_body'] = 'ਹੈਲੋ {$a->firstname},
+
+ਕੋਰਸ \"{$a->coursename}\" ਵਿੱਚ ਸ਼ਾਮਲ ਹੋਣ ਦੀ ਤੁਹਾਡੀ ਬੇਨਤੀ ਮਨਜ਼ੂਰ ਹੋ ਗਈ ਹੈ।
+
+ਐਡਮਿਨ ਟਿੱਪਣੀਆਂ: {$a->comments}
+
+ਤੁਸੀਂ ਹੁਣ ਕੋਰਸ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੇ ਹੋ।: {$a->courseurl}';
