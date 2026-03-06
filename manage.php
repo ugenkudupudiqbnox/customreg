@@ -14,6 +14,74 @@ $search = optional_param('search', '', PARAM_TEXT);
 $page   = optional_param('page', 0, PARAM_INT);
 $perpage = 20;
 
+// Handle CSV Export
+if ($action === 'downloadcsv') {
+    require_capability('local/customreg:manage', $context);
+    
+    // Build SQL for all records matches search but no pagination
+    $params = [];
+    $where = "1=1";
+    if ($search) {
+        $where .= " AND (u.firstname LIKE :s1 OR u.lastname LIKE :s2 OR u.email LIKE :s3)";
+        $params['s1'] = '%'.$search.'%';
+        $params['s2'] = '%'.$search.'%';
+        $params['s3'] = '%'.$search.'%';
+    }
+    
+    $sql = "SELECT cr.*, u.firstname, u.lastname, u.email 
+              FROM {local_customreg} cr
+              JOIN {user} u ON cr.userid = u.id
+             WHERE $where
+          ORDER BY cr.timecreated DESC";
+          
+    $records = $DB->get_records_sql($sql, $params);
+    
+    $filename = 'customreg_data_' . date('Ymd_His') . '.csv';
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename=' . $filename);
+    
+    $output = fopen('php://output', 'w');
+    
+    // Add UTF-8 BOM for Excel compatibility
+    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+    
+    // Header row
+    fputcsv($output, [
+        get_string('csv_firstname', 'local_customreg'),
+        get_string('csv_lastname', 'local_customreg'),
+        get_string('csv_email', 'local_customreg'),
+        get_string('csv_institutionid', 'local_customreg'),
+        get_string('csv_status', 'local_customreg'),
+        get_string('csv_courses', 'local_customreg'),
+        get_string('csv_timecreated', 'local_customreg')
+    ]);
+    
+    foreach ($records as $rec) {
+        // Format course list for CSV
+        $coursesjson = json_decode($rec->courseidsjson, true) ?: [];
+        $courselist = [];
+        foreach ($coursesjson as $cinfo) {
+            $course = $DB->get_record('course', ['id' => $cinfo['id']], 'shortname');
+            if ($course) {
+                $courselist[] = "{$course->shortname} ({$cinfo['status']})";
+            }
+        }
+        
+        fputcsv($output, [
+            $rec->firstname,
+            $rec->lastname,
+            $rec->email,
+            $rec->institutionid,
+            $rec->status,
+            implode(' | ', $courselist),
+            userdate($rec->timecreated, '%Y-%m-%d %H:%M:%S')
+        ]);
+    }
+    
+    fclose($output);
+    exit;
+}
+
 // Handle Log Retrieval (AJAX-like response)
 if ($action === 'getlogs' && $userid > 0) {
     require_capability('local/customreg:manage', $context);
@@ -179,8 +247,12 @@ echo $OUTPUT->header();
 
 echo $OUTPUT->heading(get_string('manageusers', 'local_customreg'));
 
+// Action bar with CSV Download
+echo '<div class="d-flex justify-content-between align-items-center mb-4">';
+$downloadurl = new moodle_url($PAGE->url, ['action' => 'downloadcsv', 'search' => $search]);
+echo html_writer::link($downloadurl, $OUTPUT->pix_icon('t/download', '') . ' ' . get_string('downloadcsv', 'local_customreg'), ['class' => 'btn btn-secondary']);
+
 // Search Bar
-echo '<div class="mb-4 d-flex justify-content-end">';
 echo $OUTPUT->render_from_template('core/search_input', [
     'action' => $PAGE->url->out(false),
     'name' => 'search',
@@ -218,6 +290,7 @@ if (!$records) {
         'Institution ID',
         get_string('documentstatus', 'local_customreg'),
         'Requested Courses',
+        get_string('csv_timecreated', 'local_customreg'),
         get_string('action', 'local_customreg')
     ];
 
@@ -331,6 +404,7 @@ if (!$records) {
             $id_with_preview,
             $statusbadge,
             $courseinfo,
+            userdate($rec->timecreated, get_string('strftimedatetimeshort', 'langconfig')),
             implode(' ', $actions)
         ];
     }
