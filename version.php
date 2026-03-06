@@ -2,7 +2,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_customreg';
-$plugin->version   = 2026030603;
+$plugin->version   = 2026030605;
 $plugin->requires  = 2025100600; // Moodle 5.1
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = 'v2.2.2 File Picker Enhancement';
+$plugin->release   = 'v2.2.5';
