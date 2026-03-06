@@ -89,7 +89,9 @@ class local_customreg_upload_form extends moodleform {
         $mform->setExpanded('fileheader');
         
         $mform->addElement('filepicker', 'govid', 'Government ID', null, [
-            'accepted_types' => ['.pdf', '.jpg', '.png']
+            'accepted_types' => ['.pdf', '.jpg', '.png', '.jpeg', '.gif', '.bmp'],
+            'return_types' => FILE_INTERNAL,
+            'maxbytes' => 3145728
         ]);
         $mform->addRule('govid', null, 'required', null, 'client');
 
@@ -120,10 +122,10 @@ class local_customreg_upload_form extends moodleform {
         if (!empty($files_in_draft)) {
             $file = reset($files_in_draft);
             $filename = $file->get_filename();
-            $allowed = ['.pdf', '.jpg', '.png', '.jpeg'];
+            $allowed = ['.pdf', '.jpg', '.png', '.jpeg', '.gif', '.bmp'];
             $ext = strtolower(strrchr($filename, '.'));
             if (!in_array($ext, $allowed)) {
-                $errors['govid'] = 'Invalid file type. Only PDF, JPG, and PNG are allowed.';
+                $errors['govid'] = 'Invalid file type. Only PDF, JPG, PNG, JPEG, GIF, and BMP are allowed.';
             }
         }
         
