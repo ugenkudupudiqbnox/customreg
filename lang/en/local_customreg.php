@@ -58,7 +58,7 @@ Your registration has been approved. You have been enrolled in the following cou
 
 Admin Comments: {$a->comments}
 
-You can now log in and access your courses.';
+You can now log in and access your courses: {$a->sitelink}';
 $string['email_rejected_subject'] = 'Registration Rejected';
 $string['email_rejected_body'] = 'Hello {$a->firstname},
 
@@ -66,7 +66,7 @@ Unfortunately, your registration has been rejected.
 
 Admin Comments: {$a->comments}
 
-Please log in and follow the instructions to re-upload your documentation.';
+Please log in and follow the instructions to re-upload your documentation: {$a->uploadurl}';
 $string['email_course_approved_subject'] = 'Course Enrollment Approved: {$a->coursename}';
 $string['email_course_approved_body'] = 'Hello {$a->firstname},
 
@@ -74,7 +74,7 @@ Your request to join the course "{$a->coursename}" has been approved.
 
 Admin Comments: {$a->comments}
 
-You can now access the course.';
+You can now access the course here: {$a->courseurl}';
 $string['notapplicable'] = 'N/A';
 $string['default_approve_comment'] = 'Your registration has been approved following our manual review.';
 $string['default_deny_comment'] = 'Your documentation was insufficient or did not match our requirements.';

@@ -59,6 +59,7 @@
 | `2026030403` | v2.1.0: Default Admin Comments, 25 Languages & Email Subject Fix |
 | `2026030421` | Current Development Version (Stability improvements) |
 | `2026030601` | v2.2.0: Added CSV Export to management dashboard |
+| `2026030602` | v2.2.1: Integrated site and course links in all user emails |
 
 ---
 
