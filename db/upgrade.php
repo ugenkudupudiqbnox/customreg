@@ -66,5 +66,9 @@ function xmldb_local_customreg_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026030605, 'local', 'customreg');
     }
 
+    if ($oldversion < 2026031001) {
+        upgrade_plugin_savepoint(true, 2026031001, 'local', 'customreg');
+    }
+
     return true;
 }
