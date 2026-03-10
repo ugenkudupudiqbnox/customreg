@@ -3,6 +3,7 @@ require('../../config.php');
 require_once($CFG->dirroot.'/local/customreg/lib.php');
 require_login();
 require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->dirroot . '/repository/lib.php');
 
 $context = context_system::instance();
 
@@ -90,6 +91,7 @@ class local_customreg_upload_form extends moodleform {
         
         $mform->addElement('filepicker', 'govid', 'Government ID', null, [
             'accepted_types' => ['.pdf', '.jpg', '.png', '.jpeg', '.gif', '.bmp'],
+            'return_types' => FILE_INTERNAL,
             'maxbytes' => 3145728
         ]);
         $mform->addRule('govid', null, 'required', null, 'client');
