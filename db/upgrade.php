@@ -70,5 +70,15 @@ function xmldb_local_customreg_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026031001, 'local', 'customreg');
     }
 
+    if ($oldversion < 2026031002) {
+        upgrade_plugin_savepoint(true, 2026031002, 'local', 'customreg');
+    }
+
+    if ($oldversion < 2026031003) {
+        // Refactored JavaScript to use proper AMD module (amd/src/manage.js)
+        // No database changes required
+        upgrade_plugin_savepoint(true, 2026031003, 'local', 'customreg');
+    }
+
     return true;
 }

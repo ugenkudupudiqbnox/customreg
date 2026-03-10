@@ -2,7 +2,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_customreg';
-$plugin->version   = 2026031001;
+$plugin->version   = 2026031003;
 $plugin->requires  = 2025100600; // Moodle 5.1
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = 'v2.2.6';
+$plugin->release   = 'v2.2.8';

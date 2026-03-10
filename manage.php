@@ -12,7 +12,14 @@ $action = optional_param('action', '', PARAM_ALPHANUMEXT);
 $userid = optional_param('userid', 0, PARAM_INT);
 $search = optional_param('search', '', PARAM_TEXT);
 $page   = optional_param('page', 0, PARAM_INT);
+$selectedusers = optional_param_array('selectedusers', [], PARAM_INT);
 $perpage = 20;
+$orderby = "CASE
+                WHEN cr.status = 'pending' THEN 0
+                WHEN cr.status = 'rejected' OR cr.status = 'denied' THEN 1
+                WHEN cr.status = 'approved' THEN 3
+                ELSE 2
+            END, cr.timemodified DESC, cr.timecreated DESC";
 
 // Handle CSV Export
 if ($action === 'downloadcsv') {
@@ -28,11 +35,11 @@ if ($action === 'downloadcsv') {
         $params['s3'] = '%'.$search.'%';
     }
     
-    $sql = "SELECT cr.*, u.firstname, u.lastname, u.email 
+        $sql = "SELECT cr.*, u.firstname, u.lastname, u.email 
               FROM {local_customreg} cr
               JOIN {user} u ON cr.userid = u.id
              WHERE $where
-          ORDER BY cr.timecreated DESC";
+            ORDER BY $orderby";
           
     $records = $DB->get_records_sql($sql, $params);
     
@@ -47,10 +54,11 @@ if ($action === 'downloadcsv') {
     
     // Header row
     fputcsv($output, [
+        'User ID',
         get_string('csv_firstname', 'local_customreg'),
         get_string('csv_lastname', 'local_customreg'),
         get_string('csv_email', 'local_customreg'),
-        get_string('csv_institutionid', 'local_customreg'),
+        'Student ID',
         get_string('csv_status', 'local_customreg'),
         get_string('csv_courses', 'local_customreg'),
         get_string('csv_timecreated', 'local_customreg')
@@ -68,6 +76,7 @@ if ($action === 'downloadcsv') {
         }
         
         fputcsv($output, [
+            $rec->userid,
             $rec->firstname,
             $rec->lastname,
             $rec->email,
@@ -273,6 +282,74 @@ if ($action === 'approveallcourses' && $userid > 0 && confirm_sesskey()) {
     redirect($PAGE->url, get_string('enrollsuccess', 'local_customreg'), 2);
 }
 
+// Handle Multi-user Bulk Approval
+if ($action === 'bulkapprove' && confirm_sesskey()) {
+    require_capability('local/customreg:manage', $context);
+
+    $comments = optional_param('comments', '', PARAM_TEXT);
+    if (empty($comments)) {
+        $comments = get_string('default_approve_comment', 'local_customreg');
+    }
+
+    $selectedusers = array_filter(array_unique(array_map('intval', $selectedusers)));
+    if (empty($selectedusers)) {
+        redirect($PAGE->url, 'No users selected for bulk approval.', 2);
+    }
+
+    list($insql, $inparams) = $DB->get_in_or_equal($selectedusers, SQL_PARAMS_NAMED, 'uid');
+    $records = $DB->get_records_sql("SELECT * FROM {local_customreg} WHERE userid $insql", $inparams);
+
+    if (empty($records)) {
+        redirect($PAGE->url, 'No matching users found for bulk approval.', 2);
+    }
+
+    $approveduserscount = 0;
+    $coursesapprovedcount = 0;
+    $enrolledcount = 0;
+    $timenow = time();
+
+    foreach ($records as $rec) {
+        $courses = json_decode($rec->courseidsjson, true);
+        if (!is_array($courses)) {
+            $courses = [];
+        }
+
+        $newlyapprovedcourses = [];
+        foreach ($courses as &$courseinfo) {
+            if (!empty($courseinfo['status']) && $courseinfo['status'] === 'pending') {
+                $courseinfo['status'] = 'approved';
+                $newlyapprovedcourses[] = (int)$courseinfo['id'];
+                $coursesapprovedcount++;
+
+                $enrollstatus = local_customreg_enroll_user_into_course((int)$rec->userid, (int)$courseinfo['id']);
+                if ($enrollstatus === 'enrollsuccess' || $enrollstatus === 'alreadyenrolled') {
+                    $enrolledcount++;
+                }
+
+                local_customreg_log((int)$rec->userid, 'approvecourse', "Course ID {$courseinfo['id']} approved via bulk user selection. Comments: $comments");
+            }
+        }
+        unset($courseinfo);
+
+        $updaterecord = new stdClass();
+        $updaterecord->id = $rec->id;
+        $updaterecord->status = 'approved';
+        $updaterecord->admin_comments = $comments;
+        $updaterecord->verifiedby = $USER->id;
+        $updaterecord->timeverified = $timenow;
+        $updaterecord->timemodified = $timenow;
+        $updaterecord->courseidsjson = json_encode($courses);
+        $DB->update_record('local_customreg', $updaterecord);
+
+        local_customreg_log((int)$rec->userid, 'approved', 'Registration approved via bulk action. Comments: ' . $comments);
+        local_customreg_notify_user_status((int)$rec->userid, 'approved', $comments, $newlyapprovedcourses);
+        $approveduserscount++;
+    }
+
+    $message = "Bulk approval completed. Users approved: {$approveduserscount}, courses approved: {$coursesapprovedcount}, enrollments processed: {$enrolledcount}.";
+    redirect($PAGE->url, $message, 2);
+}
+
 echo $OUTPUT->header();
 
 echo $OUTPUT->heading(get_string('manageusers', 'local_customreg'));
@@ -306,7 +383,7 @@ $sql = "SELECT cr.*, u.firstname, u.lastname, u.email
           FROM {local_customreg} cr
           JOIN {user} u ON cr.userid = u.id
          WHERE $where
-      ORDER BY cr.timecreated DESC";
+    ORDER BY $orderby";
 
 $totalcount = $DB->count_records_sql("SELECT COUNT(*) FROM {local_customreg} cr JOIN {user} u ON cr.userid = u.id WHERE $where", $params);
 $records = $DB->get_records_sql($sql, $params, $page * $perpage, $perpage);
@@ -314,8 +391,34 @@ $records = $DB->get_records_sql($sql, $params, $page * $perpage, $perpage);
 if (!$records) {
     echo $OUTPUT->notification('No records found.', 'info');
 } else {
+    $defaultcomments = [
+        'approve' => get_string('default_approve_comment', 'local_customreg'),
+        'deny' => get_string('default_deny_comment', 'local_customreg'),
+        'approvecourse' => get_string('default_approve_course_comment', 'local_customreg'),
+        'denycourse' => get_string('default_deny_course_comment', 'local_customreg'),
+        'approveallcourses' => get_string('default_approve_course_comment', 'local_customreg'),
+        'bulkapprove' => get_string('default_approve_comment', 'local_customreg'),
+    ];
+
+    echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url->out(false)]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'bulkapprove']);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'search', 'value' => $search]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'page', 'value' => $page]);
+
+    echo '<div class="mb-2">';
+    echo html_writer::tag('button', 'Approve Selected (ID + Courses)', [
+        'type' => 'button',
+        'class' => 'btn btn-success action-with-comment',
+        'data-action' => 'bulkapprove',
+        'data-userid' => 0,
+        'id' => 'bulk-approve-trigger'
+    ]);
+    echo '</div>';
+
     $table = new html_table();
     $table->head = [
+        html_writer::empty_tag('input', ['type' => 'checkbox', 'id' => 'bulk-select-all', 'title' => 'Select all non-approved users']),
         'User',
         'Institution ID',
         get_string('documentstatus', 'local_customreg'),
@@ -408,6 +511,16 @@ if (!$records) {
         }
 
         $actions = [];
+        $rowcheckbox = '';
+
+        if ($rec->status !== 'approved') {
+            $rowcheckbox = html_writer::empty_tag('input', [
+                'type' => 'checkbox',
+                'name' => 'selectedusers[]',
+                'value' => $rec->userid,
+                'class' => 'bulk-user-select'
+            ]);
+        }
 
         if ($rec->status !== 'approved') {
             $actions[] = $OUTPUT->action_icon('#', new pix_icon('t/check', get_string('approve', 'local_customreg')), null, ['class' => 'action-with-comment', 'data-action' => 'approve', 'data-userid' => $rec->userid]);
@@ -421,15 +534,8 @@ if (!$records) {
             'title' => 'Registration Timeline'
         ]);
 
-        $defaultcomments = [
-            'approve' => get_string('default_approve_comment', 'local_customreg'),
-            'deny' => get_string('default_deny_comment', 'local_customreg'),
-            'approvecourse' => get_string('default_approve_course_comment', 'local_customreg'),
-            'denycourse' => get_string('default_deny_course_comment', 'local_customreg'),
-            'approveallcourses' => get_string('default_approve_course_comment', 'local_customreg'),
-        ];
-
         $table->data[] = [
+            $rowcheckbox,
             $userlink . '<br><small>' . s($rec->email) . '</small>',
             $id_with_preview,
             $statusbadge,
@@ -440,156 +546,20 @@ if (!$records) {
     }
 
     echo html_writer::table($table);
+    echo html_writer::end_tag('form');
 
     echo $OUTPUT->paging_bar($totalcount, $page, $perpage, $PAGE->url);
 }
 
-// JavaScript to handle the click and update the modal using Moodle standard AMD
-$defaultcommentsjson = json_encode($defaultcomments);
-$PAGE->requires->js_amd_inline("
-require(['jquery', 'core/modal_factory', 'core/modal_events'], function($, ModalFactory, ModalEvents) {
-    var zoomLevel = 1;
-    var timelineModal = null;
-    var previewModal = null;
-    var commentModal = null;
-    var defaultComments = {$defaultcommentsjson};
-
-    // --- Action with Comment Modal ---
-    ModalFactory.create({
-        title: 'Add Admin Comment',
-        type: ModalFactory.types.SAVE_CANCEL,
-        body: '<div class=\"form-group\">' +
-              '<label for=\"admin-comment-input\">Comments / Reason</label>' +
-              '<textarea id=\"admin-comment-input\" class=\"form-control\" rows=\"3\"></textarea>' +
-              '</div>'
-    }).then(function(modal) {
-        commentModal = modal;
-        modal.setSaveButtonText('Submit Action');
-
-        $(document).on('click', '.action-with-comment', function(e) {
-            e.preventDefault();
-            var btn = $(this);
-            var data = btn.data();
-            
-            // Set default comment based on action
-            var defaultText = defaultComments[data.action] || '';
-            
-            modal.show();
-            // Wait for modal to be fully shown and DOM to be ready
-            modal.getRoot().find('#admin-comment-input').val(defaultText);
-
-            modal.getRoot().off(ModalEvents.save).on(ModalEvents.save, function() {
-                var comment = modal.getRoot().find('#admin-comment-input').val();
-                var url = new URL(window.location.href);
-                url.searchParams.set('action', data.action);
-                url.searchParams.set('userid', data.userid);
-                if (data.courseid) url.searchParams.set('courseid', data.courseid);
-                url.searchParams.set('comments', comment);
-                url.searchParams.set('sesskey', M.cfg.sesskey);
-                window.location.href = url.href;
-            });
-        });
-    });
-
-    // --- Timeline Log Logic ---
-    ModalFactory.create({
-        title: 'Registration Timeline',
-        type: ModalFactory.types.DEFAULT,
-    }).then(function(modal) {
-        timelineModal = modal;
-        $('.view-log-trigger').on('click', function(e) {
-            e.preventDefault();
-            var userid = $(this).attr('data-userid');
-            timelineModal.setBody('<div class=\"text-center\"><i class=\"fa fa-spinner fa-spin\"></i> Loading...</div>');
-            timelineModal.show();
-
-            $.get('manage.php', {action: 'getlogs', userid: userid}, function(data) {
-                if (data.length === 0) {
-                    timelineModal.setBody('<div class=\"alert alert-info\">No logs found for this user.</div>');
-                    return;
-                }
-                var html = '<ul class=\"list-group list-group-flush\">';
-                $.each(data, function(i, log) {
-                    var badgeClass = 'secondary';
-                    if (log.action.toLowerCase() === 'approved') badgeClass = 'success';
-                    if (log.action.toLowerCase() === 'denied') badgeClass = 'danger';
-                    if (log.action.toLowerCase() === 'raised') badgeClass = 'primary';
-                    if (log.action.toLowerCase() === 'uploaded') badgeClass = 'info';
-
-                    html += '<li class=\"list-group-item px-1 border-bottom\">' +
-                            '<div class=\"d-flex justify-content-between align-items-center mb-1\">' +
-                            '<strong><span class=\"badge badge-' + badgeClass + ' bg-' + badgeClass + '\">' + log.action + '</span></strong>' +
-                            '<small class=\"text-muted text-right\">' + log.date + '</small>' +
-                            '</div>' +
-                            '<div class=\"small\">' + log.details + '</div>' +
-                            '<div class=\"small text-muted\"><em>By: ' + log.admin + '</em></div>' +
-                            '</li>';
-                });
-                html += '</ul>';
-                timelineModal.setBody(html);
-            });
-        });
-    });
-
-    // --- Identity Preview Modal Logic ---
-    ModalFactory.create({
-        title: 'Identity Document Preview',
-        type: ModalFactory.types.LARGE,
-    }).then(function(modal) {
-        previewModal = modal;
-        
-        $('.view-id-trigger').on('click', function(e) {
-            e.preventDefault();
-            var url = $(this).attr('data-url');
-            var isImage = url.match(/\.(jpg|jpeg|png|gif|webp)/i);
-            zoomLevel = 1;
-
-            var body = $('<div style=\"height: 70vh; display: flex; flex-direction: column;\"></div>');
-            
-            // Add Controls if image
-            if (isImage) {
-                var controls = $('<div class=\"mb-2 text-center\">' +
-                    '<button type=\"button\" class=\"btn btn-outline-secondary btn-sm mr-1\" id=\"modalZoomOut\"><i class=\"fa fa-search-minus\"></i></button>' +
-                    '<button type=\"button\" class=\"btn btn-outline-secondary btn-sm mr-1\" id=\"modalZoomIn\"><i class=\"fa fa-search-plus\"></i></button>' +
-                    '<button type=\"button\" class=\"btn btn-outline-secondary btn-sm\" id=\"modalReset\">Reset</button>' +
-                '</div>');
-                body.append(controls);
-                
-                var wrap = $('<div style=\"flex-grow: 1; overflow: auto; background: #f8f9fa; text-align: center;\"></div>');
-                var img = $('<img id=\"modalPreviewImage\" src=\"' + url + '\" style=\"max-width: 100%; transform-origin: top center; transition: transform 0.2s;\">');
-                wrap.append(img);
-                body.append(wrap);
-            } else {
-                var iframe = $('<iframe src=\"' + url + '\" style=\"width: 100%; flex-grow: 1; border: none;\"></iframe>');
-                body.append(iframe);
-            }
-
-            previewModal.setBody(body);
-            previewModal.show();
-
-            // Bind zoom events after the body is inserted
-            $('#modalZoomIn').on('click', function() {
-                zoomLevel += 0.2;
-                $('#modalPreviewImage').css('transform', 'scale(' + zoomLevel + ')');
-            });
-            $('#modalZoomOut').on('click', function() {
-                if (zoomLevel > 0.4) {
-                    zoomLevel -= 0.2;
-                    $('#modalPreviewImage').css('transform', 'scale(' + zoomLevel + ')');
-                }
-            });
-            $('#modalReset').on('click', function() {
-                zoomLevel = 1;
-                $('#modalPreviewImage').css('transform', 'scale(1)');
-            });
-        });
-
-        // Clear when closed
-        previewModal.getRoot().on(ModalEvents.hidden, function() {
-            previewModal.setBody('');
-        });
-    });
-});
-");
+// Initialize the management page JavaScript using proper AMD module
+$defaultcomments = [
+    'approve' => get_string('default_approve_comment', 'local_customreg'),
+    'deny' => get_string('default_deny_comment', 'local_customreg'),
+    'approvecourse' => get_string('default_approve_course_comment', 'local_customreg'),
+    'denycourse' => get_string('default_deny_course_comment', 'local_customreg'),
+    'approveallcourses' => get_string('default_approve_course_comment', 'local_customreg'),
+    'bulkapprove' => get_string('default_approve_comment', 'local_customreg'),
+];
+$PAGE->requires->js_call_amd('local_customreg/manage', 'init', [$defaultcomments]);
 
 echo $OUTPUT->footer();

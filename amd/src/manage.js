@@ -1,0 +1,241 @@
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * JavaScript for custom registration management page.
+ *
+ * @module     local_customreg/manage
+ * @copyright  2026 Qbnox
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+define(['jquery', 'core/modal_factory', 'core/modal_events', 'core/str'], 
+function($, ModalFactory, ModalEvents, Str) {
+    
+    var zoomLevel = 1;
+    var timelineModal = null;
+    var previewModal = null;
+    var commentModal = null;
+
+    /**
+     * Initialize the management page interactions.
+     *
+     * @param {Object} defaultComments Default comment text for each action type
+     */
+    var init = function(defaultComments) {
+        
+        // Create comment modal for actions requiring admin comments
+        ModalFactory.create({
+            title: 'Add Admin Comment',
+            type: ModalFactory.types.SAVE_CANCEL,
+            body: '<div class="form-group">' +
+                  '<label for="admin-comment-input">Comments / Reason</label>' +
+                  '<textarea id="admin-comment-input" class="form-control" rows="3"></textarea>' +
+                  '</div>'
+        }).then(function(modal) {
+            commentModal = modal;
+            modal.setSaveButtonText('Submit Action');
+
+            // Handle all action buttons that require comments
+            $(document).on('click', '.action-with-comment', function(e) {
+                e.preventDefault();
+                var btn = $(this);
+                var data = btn.data();
+                
+                // Set default comment based on action
+                var defaultText = defaultComments[data.action] || '';
+                
+                modal.show();
+                // Set default text after modal is shown
+                modal.getRoot().find('#admin-comment-input').val(defaultText);
+
+                // Handle save action
+                modal.getRoot().off(ModalEvents.save).on(ModalEvents.save, function() {
+                    var comment = modal.getRoot().find('#admin-comment-input').val();
+                    
+                    // Special handling for bulk approve
+                    if (data.action === 'bulkapprove') {
+                        var selected = $('input.bulk-user-select:checked');
+                        if (selected.length === 0) {
+                            modal.hide();
+                            alert('Please select at least one non-approved user.');
+                            return;
+                        }
+
+                        var form = $('#bulk-approve-trigger').closest('form');
+                        if (!form.length) {
+                            modal.hide();
+                            return;
+                        }
+
+                        // Add comment as hidden input and submit
+                        form.find('input[name="comments"]').remove();
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'comments',
+                            value: comment
+                        }).appendTo(form);
+                        form.trigger('submit');
+                        return;
+                    }
+
+                    // Handle single-user actions
+                    var url = new URL(window.location.href);
+                    url.searchParams.set('action', data.action);
+                    url.searchParams.set('userid', data.userid);
+                    if (data.courseid) {
+                        url.searchParams.set('courseid', data.courseid);
+                    }
+                    url.searchParams.set('comments', comment);
+                    url.searchParams.set('sesskey', M.cfg.sesskey);
+                    window.location.href = url.href;
+                });
+            });
+        });
+
+        // Bulk select all checkbox handler
+        $(document).on('change', '#bulk-select-all', function() {
+            var checked = $(this).is(':checked');
+            $('input.bulk-user-select').prop('checked', checked);
+        });
+
+        // Individual checkbox handler to update select-all state
+        $(document).on('change', 'input.bulk-user-select', function() {
+            var total = $('input.bulk-user-select').length;
+            var checked = $('input.bulk-user-select:checked').length;
+            $('#bulk-select-all').prop('checked', total > 0 && total === checked);
+        });
+
+        // Timeline log viewer modal
+        ModalFactory.create({
+            title: 'Registration Timeline',
+            type: ModalFactory.types.DEFAULT,
+        }).then(function(modal) {
+            timelineModal = modal;
+            
+            $('.view-log-trigger').on('click', function(e) {
+                e.preventDefault();
+                var userid = $(this).attr('data-userid');
+                timelineModal.setBody('<div class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</div>');
+                timelineModal.show();
+
+                // Load logs via AJAX
+                $.get('manage.php', {action: 'getlogs', userid: userid}, function(data) {
+                    if (data.length === 0) {
+                        timelineModal.setBody('<div class="alert alert-info">No logs found for this user.</div>');
+                        return;
+                    }
+                    
+                    var html = '<ul class="list-group list-group-flush">';
+                    $.each(data, function(i, log) {
+                        var badgeClass = 'secondary';
+                        if (log.action.toLowerCase() === 'approved') {
+                            badgeClass = 'success';
+                        }
+                        if (log.action.toLowerCase() === 'denied') {
+                            badgeClass = 'danger';
+                        }
+                        if (log.action.toLowerCase() === 'raised') {
+                            badgeClass = 'primary';
+                        }
+                        if (log.action.toLowerCase() === 'uploaded') {
+                            badgeClass = 'info';
+                        }
+
+                        html += '<li class="list-group-item px-1 border-bottom">' +
+                                '<div class="d-flex justify-content-between align-items-center mb-1">' +
+                                '<strong><span class="badge badge-' + badgeClass + ' bg-' + badgeClass + '">' + 
+                                log.action + '</span></strong>' +
+                                '<small class="text-muted text-right">' + log.date + '</small>' +
+                                '</div>' +
+                                '<div class="small">' + log.details + '</div>' +
+                                '<div class="small text-muted"><em>By: ' + log.admin + '</em></div>' +
+                                '</li>';
+                    });
+                    html += '</ul>';
+                    timelineModal.setBody(html);
+                });
+            });
+        });
+
+        // Identity document preview modal
+        ModalFactory.create({
+            title: 'Identity Document Preview',
+            type: ModalFactory.types.LARGE,
+        }).then(function(modal) {
+            previewModal = modal;
+            
+            $('.view-id-trigger').on('click', function(e) {
+                e.preventDefault();
+                var url = $(this).attr('data-url');
+                var isImage = url.match(/\.(jpg|jpeg|png|gif|webp)/i);
+                zoomLevel = 1;
+
+                var body = $('<div style="height: 70vh; display: flex; flex-direction: column;"></div>');
+                
+                // Add zoom controls for images
+                if (isImage) {
+                    var controls = $('<div class="mb-2 text-center">' +
+                        '<button type="button" class="btn btn-outline-secondary btn-sm mr-1" id="modalZoomOut">' +
+                        '<i class="fa fa-search-minus"></i></button>' +
+                        '<button type="button" class="btn btn-outline-secondary btn-sm mr-1" id="modalZoomIn">' +
+                        '<i class="fa fa-search-plus"></i></button>' +
+                        '<button type="button" class="btn btn-outline-secondary btn-sm" id="modalReset">Reset</button>' +
+                    '</div>');
+                    body.append(controls);
+                    
+                    var wrap = $('<div style="flex-grow: 1; overflow: auto; background: #f8f9fa; text-align: center;"></div>');
+                    var img = $('<img id="modalPreviewImage" src="' + url + 
+                               '" style="max-width: 100%; transform-origin: top center; transition: transform 0.2s;">');
+                    wrap.append(img);
+                    body.append(wrap);
+                } else {
+                    // For PDFs and other documents, use iframe
+                    var iframe = $('<iframe src="' + url + 
+                                  '" style="width: 100%; flex-grow: 1; border: none;"></iframe>');
+                    body.append(iframe);
+                }
+
+                previewModal.setBody(body);
+                previewModal.show();
+
+                // Bind zoom event handlers after body is inserted
+                $('#modalZoomIn').on('click', function() {
+                    zoomLevel += 0.2;
+                    $('#modalPreviewImage').css('transform', 'scale(' + zoomLevel + ')');
+                });
+                $('#modalZoomOut').on('click', function() {
+                    if (zoomLevel > 0.4) {
+                        zoomLevel -= 0.2;
+                        $('#modalPreviewImage').css('transform', 'scale(' + zoomLevel + ')');
+                    }
+                });
+                $('#modalReset').on('click', function() {
+                    zoomLevel = 1;
+                    $('#modalPreviewImage').css('transform', 'scale(1)');
+                });
+            });
+
+            // Clear modal content when closed
+            previewModal.getRoot().on(ModalEvents.hidden, function() {
+                previewModal.setBody('');
+            });
+        });
+    };
+
+    return {
+        init: init
+    };
+});
