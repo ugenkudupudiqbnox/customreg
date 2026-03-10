@@ -226,6 +226,57 @@ function local_customreg_validate_courses($value) {
 }
 
 /**
+ * Export registration data in multiple formats
+ * @param array $records Array of registration records
+ * @param string $format Export format: 'csv' | 'tsv' | 'ods' | 'html'
+ * @return array Array with 'headers' and 'data' keys for export
+ */
+function local_customreg_export_table_data($records, $format = 'csv') {
+    global $DB;
+    
+    $headers = [
+        'User ID',
+        get_string('csv_firstname', 'local_customreg'),
+        get_string('csv_lastname', 'local_customreg'),
+        get_string('csv_email', 'local_customreg'),
+        get_string('csv_studentid', 'local_customreg', 'Student ID'),
+        get_string('csv_status', 'local_customreg'),
+        get_string('csv_courses', 'local_customreg'),
+        get_string('csv_timecreated', 'local_customreg')
+    ];
+    
+    $data = [];
+    
+    foreach ($records as $rec) {
+        // Format course list for export
+        $coursesjson = json_decode($rec->courseidsjson, true) ?: [];
+        $courselist = [];
+        foreach ($coursesjson as $cinfo) {
+            $course = $DB->get_record('course', ['id' => $cinfo['id']], 'shortname');
+            if ($course) {
+                $courselist[] = "{$course->shortname} ({$cinfo['status']})";
+            }
+        }
+        
+        $data[] = [
+            $rec->userid,
+            $rec->firstname,
+            $rec->lastname,
+            $rec->email,
+            $rec->institutionid,
+            $rec->status,
+            implode(' | ', $courselist),
+            userdate($rec->timecreated, '%Y-%m-%d %H:%M:%S')
+        ];
+    }
+    
+    return [
+        'headers' => $headers,
+        'data' => $data
+    ];
+}
+
+/**
  * Legacy hook for enforcement
  */
 function local_customreg_before_http_headers() {

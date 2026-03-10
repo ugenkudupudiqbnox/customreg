@@ -80,5 +80,11 @@ function xmldb_local_customreg_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026031003, 'local', 'customreg');
     }
 
+    if ($oldversion < 2026031004) {
+        // Implemented Moodle standard table download functionality with multiple formats
+        // Supports CSV, TSV, HTML export formats
+        upgrade_plugin_savepoint(true, 2026031004, 'local', 'customreg');
+    }
+
     return true;
 }

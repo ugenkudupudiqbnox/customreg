@@ -21,11 +21,12 @@ $orderby = "CASE
                 ELSE 2
             END, cr.timemodified DESC, cr.timecreated DESC";
 
-// Handle CSV Export
-if ($action === 'downloadcsv') {
+// Handle Table Data Export (Multiple Formats)
+$exportformats = ['csv', 'tsv', 'ods', 'html'];
+if (in_array($action, $exportformats, true)) {
     require_capability('local/customreg:manage', $context);
     
-    // Build SQL for all records matches search but no pagination
+    // Build SQL for all records matching search but no pagination
     $params = [];
     $where = "1=1";
     if ($search) {
@@ -35,59 +36,79 @@ if ($action === 'downloadcsv') {
         $params['s3'] = '%'.$search.'%';
     }
     
-        $sql = "SELECT cr.*, u.firstname, u.lastname, u.email 
-              FROM {local_customreg} cr
-              JOIN {user} u ON cr.userid = u.id
-             WHERE $where
+    $sql = "SELECT cr.*, u.firstname, u.lastname, u.email 
+            FROM {local_customreg} cr
+            JOIN {user} u ON cr.userid = u.id
+            WHERE $where
             ORDER BY $orderby";
           
     $records = $DB->get_records_sql($sql, $params);
+    $exportdata = local_customreg_export_table_data($records, $action);
     
-    $filename = 'customreg_data_' . date('Ymd_His') . '.csv';
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename=' . $filename);
+    // Determine filename and content type
+    $filename = 'customreg_data_' . date('Ymd_His');
     
-    $output = fopen('php://output', 'w');
-    
-    // Add UTF-8 BOM for Excel compatibility
-    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-    
-    // Header row
-    fputcsv($output, [
-        'User ID',
-        get_string('csv_firstname', 'local_customreg'),
-        get_string('csv_lastname', 'local_customreg'),
-        get_string('csv_email', 'local_customreg'),
-        'Student ID',
-        get_string('csv_status', 'local_customreg'),
-        get_string('csv_courses', 'local_customreg'),
-        get_string('csv_timecreated', 'local_customreg')
-    ]);
-    
-    foreach ($records as $rec) {
-        // Format course list for CSV
-        $coursesjson = json_decode($rec->courseidsjson, true) ?: [];
-        $courselist = [];
-        foreach ($coursesjson as $cinfo) {
-            $course = $DB->get_record('course', ['id' => $cinfo['id']], 'shortname');
-            if ($course) {
-                $courselist[] = "{$course->shortname} ({$cinfo['status']})";
+    switch ($action) {
+        case 'csv':
+            $filename .= '.csv';
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename=' . $filename);
+            
+            $output = fopen('php://output', 'w');
+            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
+            fputcsv($output, $exportdata['headers']);
+            foreach ($exportdata['data'] as $row) {
+                fputcsv($output, $row);
             }
-        }
-        
-        fputcsv($output, [
-            $rec->userid,
-            $rec->firstname,
-            $rec->lastname,
-            $rec->email,
-            $rec->institutionid,
-            $rec->status,
-            implode(' | ', $courselist),
-            userdate($rec->timecreated, '%Y-%m-%d %H:%M:%S')
-        ]);
+            fclose($output);
+            break;
+            
+        case 'tsv':
+            $filename .= '.tsv';
+            header('Content-Type: text/tab-separated-values; charset=utf-8');
+            header('Content-Disposition: attachment; filename=' . $filename);
+            
+            $output = fopen('php://output', 'w');
+            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
+            fputcsv($output, $exportdata['headers'], "\t");
+            foreach ($exportdata['data'] as $row) {
+                fputcsv($output, $row, "\t");
+            }
+            fclose($output);
+            break;
+            
+        case 'ods':
+            // For ODS, we would need a library like phpoffice/phpspreadsheet
+            // As a fallback, provide CSV with ODS extension or use simple table HTML
+            $filename .= '.ods.txt';
+            header('Content-Type: text/plain; charset=utf-8');
+            header('Content-Disposition: attachment; filename=' . $filename);
+            
+            echo "Note: ODS format requires phpoffice/phpspreadsheet library.\n";
+            echo "For now, please use CSV or TSV format.\n\n";
+            echo implode("\t", $exportdata['headers']) . "\n";
+            foreach ($exportdata['data'] as $row) {
+                echo implode("\t", $row) . "\n";
+            }
+            break;
+            
+        case 'html':
+            $filename .= '.html';
+            header('Content-Type: text/html; charset=utf-8');
+            header('Content-Disposition: attachment; filename=' . $filename);
+            
+            $table = new html_table();
+            $table->head = $exportdata['headers'];
+            $table->data = $exportdata['data'];
+            
+            echo '<!DOCTYPE html>';
+            echo '<html><head><meta charset="utf-8"><title>' . s($filename) . '</title>';
+            echo '<style>table { border-collapse: collapse; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }</style></head><body>';
+            echo html_writer::table($table);
+            echo '</body></html>';
+            break;
     }
     
-    fclose($output);
     exit;
 }
 
@@ -354,10 +375,35 @@ echo $OUTPUT->header();
 
 echo $OUTPUT->heading(get_string('manageusers', 'local_customreg'));
 
-// Action bar with CSV Download
+// Action bar with Standard Moodle Download Menu
 echo '<div class="d-flex justify-content-between align-items-center mb-4">';
-$downloadurl = new moodle_url($PAGE->url, ['action' => 'downloadcsv', 'search' => $search]);
-echo html_writer::link($downloadurl, $OUTPUT->pix_icon('t/download', '') . ' ' . get_string('downloadcsv', 'local_customreg'), ['class' => 'btn btn-secondary']);
+
+// Create download menu using action_menu following Moodle standards
+$menu = new action_menu();
+$menu->set_menu_trigger(get_string('downloadtable', 'core_table'));
+
+$downloadcsv = new moodle_url($PAGE->url, ['action' => 'csv', 'search' => $search]);
+$menu->add(new action_menu_link_secondary(
+    $downloadcsv,
+    new pix_icon('i/download', ''),
+    get_string('downloadcsv', 'local_customreg')
+));
+
+$downloadtsv = new moodle_url($PAGE->url, ['action' => 'tsv', 'search' => $search]);
+$menu->add(new action_menu_link_secondary(
+    $downloadtsv,
+    new pix_icon('i/download', ''),
+    get_string('downloadtsv', 'local_customreg', 'TSV (Tab-separated)')
+));
+
+$downloadhtml = new moodle_url($PAGE->url, ['action' => 'html', 'search' => $search]);
+$menu->add(new action_menu_link_secondary(
+    $downloadhtml,
+    new pix_icon('i/download', ''),
+    get_string('downloadhtml', 'local_customreg', 'HTML Table')
+));
+
+echo $OUTPUT->render($menu);
 
 // Search Bar
 echo $OUTPUT->render_from_template('core/search_input', [
