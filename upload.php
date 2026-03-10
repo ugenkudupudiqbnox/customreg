@@ -90,7 +90,6 @@ class local_customreg_upload_form extends moodleform {
         
         $mform->addElement('filepicker', 'govid', 'Government ID', null, [
             'accepted_types' => ['.pdf', '.jpg', '.png', '.jpeg', '.gif', '.bmp'],
-            'return_types' => FILE_INTERNAL,
             'maxbytes' => 3145728
         ]);
         $mform->addRule('govid', null, 'required', null, 'client');
